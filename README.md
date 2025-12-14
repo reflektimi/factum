@@ -1,59 +1,171 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Finances SaaS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![License](https://img.shields.io/badge/license-MIT-blue.svg) ![PHP](https://img.shields.io/badge/php-8.2+-purple.svg) ![Laravel](https://img.shields.io/badge/laravel-10.x-red.svg) ![React](https://img.shields.io/badge/react-18.x-cyan.svg) ![Tailwind](https://img.shields.io/badge/tailwind-3.x-38bdf8.svg)
 
-## About Laravel
+> A comprehensive, modern finance management platform with invoicing, recurring payments, and dashboard analytics.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Finances SaaS** is a full-stack web application designed to streamline financial operations for small businesses and freelancers. Built with performance and user experience in mind, it offers a seamless interface for managing clients, tracking expenses, generating professional invoices, and monitoring financial health through interactive dashboards.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Table of Contents
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Application Routes](#application-routes)
+- [Contributing](#contributing)
+- [License](#license)
+- [Roadmap](#roadmap)
 
-## Learning Laravel
+## Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- **🔐 Robust Authentication**: Secure user registration, login, and profile management.
+- **📊 Interactive Dashboard**: Real-time overview of income, expenses, and cash flow visualization.
+- **🧾 Invoice Management**: Create, edit, and track statuses of professional invoices.
+- **🔄 Recurring Billing**: Automate invoicing with flexible recurring intervals (weekly, monthly, yearly).
+- **💳 Payment Tracking**: Log partial or full payments against invoices.
+- **📝 Quote System**: Generate estimates/quotes and convert them directly to invoices.
+- **👥 Client Management**: Store and manage customer and supplier details (CRM).
+- **📉 Expense Tracking**: Categorize and monitor business expenses.
+- **📨 Credit Notes**: Handle refunds and cancellations efficiently.
+- **🔍 Global Search**: Quickly find documents, contacts, or settings from anywhere in the app.
+- **🎨 Custom Branding**: Personalized document layouts with logo, color, and footer customization.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tech Stack
 
-## Laravel Sponsors
+**Backend**
+- **Laravel 10.x**: Robust PHP framework for secure and scalable API delivery.
+- **SQLite**: Lightweight, serverless configuration for development (easily swappable for MySQL/PostgreSQL in production).
+- **Inertia.js**: The glue connecting the Laravel backend directly to the React frontend.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Frontend**
+- **React 18**: Component-based library for building dynamic user interfaces.
+- **Typescript**: For type-safe code and better developer experience.
+- **Tailwind CSS**: Utility-first framework for rapid, responsive styling.
+- **Lucide React**: Beautiful, consistent icon set.
 
-### Premium Partners
+## Installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Follow these steps to set up the project locally for development.
+
+### Prerequisites
+- PHP 8.2 or higher
+- Composer
+- Node.js & NPM
+
+### Setup Steps
+
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/L0t1/finances-saas.git
+    cd finances-saas
+    ```
+
+2.  **Install PHP Dependencies**
+    ```bash
+    composer install
+    ```
+
+3.  **Install Node Dependencies**
+    ```bash
+    npm install
+    ```
+
+4.  **Environment Configuration**
+    Copy the example env file and configure your settings.
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+    *Note: By default, the app is configured for SQLite. Ensure your `DB_CONNECTION` is set to `sqlite` or configure your preferred database.*
+
+5.  **Database Migration & Seeding**
+    Create the sqlite file (if using SQLite) and run migrations.
+    ```bash
+    touch database/database.sqlite
+    php artisan migrate --seed
+    ```
+    *(The `--seed` flag populates the database with test users and dummy data).*
+
+6.  **Run Development Servers**
+    Open two terminals:
+
+    *Terminal 1 (Laravel Server)*
+    ```bash
+    php artisan serve
+    ```
+
+    *Terminal 2 (Vite Server)*
+    ```bash
+    npm run dev
+    ```
+
+7.  **Access the App**
+    Open your browser and navigate to `http://127.0.0.1:8000`.
+
+## Usage
+
+Once logged in, you can navigate using the sidebar to access distinct modules.
+
+### Dashboard
+Get a quick snapshot of your business performance.
+![Dashboard Placeholder](public/screenshots/dashboard.png)
+
+### Invoicing
+Navigate to **Invoices** -> **New Invoice** to start billing.
+1. Select a customer.
+2. Add line items.
+3. Save as Draft or Mark as Sent.
+
+### Recurring Profiles
+Set up automated billing cycles in the **Recurring Invoices** section.
+
+## Application Routes
+
+Since this application operates as a monolithic SPA using **Inertia.js**, most routes render views rather than returning raw JSON. However, these are the primary resource endpoints available:
+
+| Resource | Methods | Description |
+| :--- | :--- | :--- |
+| `/dashboard` | `GET` | Main analytics overview |
+| `/invoices` | `GET`, `POST`, `PUT`, `DELETE` | Invoice management CRUD |
+| `/quotes` | `GET`, `POST`, `PUT`, `DELETE` | Quote/Estimate management CRUD |
+| `/quotes/{id}/convert` | `POST` | Convert a quote to an invoice |
+| `/recurring-invoices` | `GET`, `POST`, `PUT`, `DELETE` | Recurring profile management |
+| `/payments` | `GET`, `POST`, `PUT`, `DELETE` | Payment logging and tracking |
+| `/credit-notes` | `GET`, `POST`, `PUT`, `DELETE` | Credit note management |
+| `/accounts` | `GET`, `POST`, `PUT`, `DELETE` | Customer/Supplier management |
+| `/settings` | `GET`, `POST` | App configuration and branding |
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Contributions are welcome! If you'd like to improve Finances SaaS, please follow these steps:
 
-## Code of Conduct
+1.  **Fork** the repository.
+2.  Create a **Feature Branch** (`git checkout -b feature/AmazingFeature`).
+3.  **Commit** your changes (`git commit -m 'feat: Add AmazingFeature'`).
+    *   *Please use Conventional Commits (feat, fix, chore, etc.)*.
+4.  **Push** to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a **Pull Request**.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Coding Standards
+- **PHP**: Follow PSR-12 coding standards.
+- **React**: Functional components with Hooks.
+- **Styling**: Use utility classes (Tailwind) over custom CSS whenever possible.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Roadmap
+
+- [ ] ⏳ Time Tracking Module
+- [ ] 📦 Inventory Management
+- [ ] 🌍 Multi-currency Support
+- [ ] 📧 SMTP and Email Integration
+
+## Contact
+
+Project Link: [https://github.com/L0t1/finances-saas](https://github.com/L0t1/finances-saas)
+
+---
+*Built with ❤️ by L0t1*
