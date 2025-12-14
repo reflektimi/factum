@@ -28,6 +28,7 @@
 - **👥 Client Management**: Store and manage customer and supplier details (CRM).
 - **📉 Expense Tracking**: Categorize and monitor business expenses.
 - **📨 Credit Notes**: Handle refunds and cancellations efficiently.
+- **🛡️ Secure Backups**: Automatic, encrypted, and compressed backups of your database and storage.
 - **🔍 Global Search**: Quickly find documents, contacts, or settings from anywhere in the app.
 - **🎨 Custom Branding**: Personalized document layouts with logo, color, and footer customization.
 
@@ -119,6 +120,11 @@ Navigate to **Invoices** -> **New Invoice** to start billing.
 
 ### Recurring Profiles
 Set up automated billing cycles in the **Recurring Invoices** section.
+
+### Backup & Restoration
+**Backup**: Run `php artisan backup:run` to create an encrypted backup in `storage/app/backups`.
+**Restore**: Run `php artisan backup:restore <filename>` to recover your database and files from a backup.
+*Note: Restoration requires the same `BACKUP_ENCRYPTION_KEY` in your `.env` file that was used to create the backup.*
 
 ## Application Routes
 
