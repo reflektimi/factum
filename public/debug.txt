@@ -1,0 +1,23 @@
+Array
+(
+    [company_name] => FinancesPro SaaS
+    [email] => info@financespro.com
+    [phone] => +1 (555) 123-4567
+    [address] => 123 Business Street, New York, NY 10001
+    [bank_details] => 
+    [primary_color] => #3b82f6
+    [logo] => Illuminate\Http\UploadedFile Object
+        (
+            [originalName:Symfony\Component\HttpFoundation\File\UploadedFile:private] => lot.kycyku.png
+            [mimeType:Symfony\Component\HttpFoundation\File\UploadedFile:private] => application/octet-stream
+            [error:Symfony\Component\HttpFoundation\File\UploadedFile:private] => 1
+            [originalPath:Symfony\Component\HttpFoundation\File\UploadedFile:private] => lot.kycyku.png
+            [test:Symfony\Component\HttpFoundation\File\UploadedFile:private] => 
+            [hashName:protected] => 
+            [pathName:SplFileInfo:private] => 
+            [fileName:SplFileInfo:private] => 
+        )
+
+)
+
+Has File: No
