@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Setting;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class SettingController extends Controller
+{
+    /**
+     * Display the settings page
+     */
+    public function index()
+    {
+        // Get the first setting or create default
+        $settings = Setting::firstOrCreate(
+            ['id' => 1],
+            [
+                'company_name' => 'My Company',
+                'email' => 'admin@example.com',
+                'primary_color' => '#3b82f6',
+                'currencies' => ['USD'],
+                'tax_rules' => []
+            ]
+        );
+        
+        return Inertia::render('Settings', [
+            'settings' => $settings,
+        ]);
+    }
+
+    /**
+     * Update settings
+     */
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'company_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'primary_color' => 'nullable|string',
+            'bank_details' => 'nullable|string',
+            'logo' => 'nullable|image|max:2048',
+            'currencies' => 'nullable|array',
+            'tax_rules' => 'nullable|array',
+        ]);
+        
+        $settings = Setting::firstOrFail();
+        
+        // Use only validated data, excluding 'logo' (handled separately)
+        $data = collect($validated)->except(['logo'])->toArray();
+
+        if ($request->hasFile('logo')) {
+            // Delete old logo if exists? Optional.
+            $path = $request->file('logo')->store('logos', 'public');
+            $data['logo_path'] = '/storage/' . $path;
+        }
+
+        $settings->update($data);
+        
+        return back()->with('success', 'Settings updated successfully.');
+    }
+}
