@@ -52,34 +52,43 @@ export default function RecurringInvoices({ recurringInvoices, filters }: Recurr
             <Head title="Recurring Invoices" />
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6 items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
-                 <div className="relative flex-1 w-full">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                        type="search"
-                        placeholder="Search profiles or customers..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 text-sm border-0 bg-transparent focus:ring-0 placeholder:text-gray-400"
-                    />
-                </div>
-                 <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
-                <div className="flex items-center gap-2">
-                    <select
-                         className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="active">Active</option>
-                        <option value="paused">Paused</option>
-                        <option value="ended">Ended</option>
-                    </select>
-                    <Button onClick={handleSearch} variant="ghost" size="sm">
-                        Apply
-                    </Button>
-                </div>
-            </div>
+            {/* Filters */}
+            <Card className="mb-6">
+                <CardContent className="p-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search profiles or customers..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <select
+                                className="rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 h-[42px]"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="all">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="paused">Paused</option>
+                                <option value="ended">Ended</option>
+                            </select>
+                            <Button onClick={handleSearch} variant="secondary">
+                                Apply
+                            </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Recurring Invoices Table */}
+            <Card>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
 
             <Table>
                 <TableHeader>
@@ -162,6 +171,9 @@ export default function RecurringInvoices({ recurringInvoices, filters }: Recurr
                     )}
                 </TableBody>
             </Table>
+            </div>
+            </CardContent>
+            </Card>
         </AuthenticatedLayout>
     );
 }

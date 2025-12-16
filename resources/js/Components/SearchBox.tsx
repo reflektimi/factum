@@ -70,7 +70,7 @@ export default function SearchBox() {
             <input
                 type="search"
                 placeholder="Search invoices, clients... (e.g. 'INV-001')"
-                className="block w-full rounded-lg border-0 bg-slate-100 py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all font-body"
+                className="block w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all font-body"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => {

@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 import Card, { CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
 import StatusBadge from '@/Components/ui/StatusBadge';
 import Button from '@/Components/ui/Button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { Plus, Search, Filter } from 'lucide-react';
 
@@ -76,74 +77,59 @@ export default function Payments({ payments, filters }: PaymentsProps) {
 
                     {/* Payments Table */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle>All Payments</CardTitle>
-                        </CardHeader>
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Invoice #
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Customer
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Date
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Payment Method
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Amount
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Invoice #</TableHead>
+                                            <TableHead>Customer</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Payment Method</TableHead>
+                                            <TableHead>Amount</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
                                         {payments.data.map((payment) => (
-                                            <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                            <TableRow key={payment.id}>
+                                                <TableCell className="font-medium">
                                                     <Link
                                                         href={route('invoices.show', payment.invoice_id)}
-                                                        className="font-medium text-primary-600 hover:text-primary-700"
+                                                        className="text-primary-600 hover:text-primary-700"
                                                     >
                                                         {payment.invoice?.number}
                                                     </Link>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                                                </TableCell>
+                                                <TableCell className="text-gray-900">
                                                     {payment.customer?.name}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                                                </TableCell>
+                                                <TableCell className="text-gray-600">
                                                     {formatDate(payment.date)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                                                </TableCell>
+                                                <TableCell className="text-gray-600">
                                                     {payment.payment_method}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                                                </TableCell>
+                                                <TableCell className="font-semibold text-gray-900">
                                                     {formatCurrency(payment.amount)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                </TableCell>
+                                                <TableCell>
                                                     <StatusBadge status={payment.status} />
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                </TableCell>
+                                                <TableCell className="text-right">
                                                     <Link href={route('payments.show', payment.id)}>
                                                         <Button variant="ghost" size="sm">
                                                             View
                                                         </Button>
                                                     </Link>
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         ))}
-                                    </tbody>
-                                </table>
+                                    </TableBody>
+                                </Table>
+                            </div>
                             </div>
                         </CardContent>
                     </Card>

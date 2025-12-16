@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import Card, { CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
 import Badge from '@/Components/ui/Badge';
 import Button from '@/Components/ui/Button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { Plus, Search, Filter, Receipt } from 'lucide-react';
 import { PaginatedData, Expense } from '@/types/models';
@@ -74,58 +75,42 @@ export default function Expenses({ expenses, filters }: ExpensesProps) {
 
                     {/* Expenses Table */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle>All Expenses</CardTitle>
-                        </CardHeader>
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Date
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Description
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Category
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Merchant
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Amount
-                                            </th>
-                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Receipt
-                                            </th>
-                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Description</TableHead>
+                                            <TableHead>Category</TableHead>
+                                            <TableHead>Merchant</TableHead>
+                                            <TableHead>Amount</TableHead>
+                                            <TableHead className="text-right">Receipt</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
                                         {expenses.data.map((expense) => (
-                                            <tr key={expense.id} className="hover:bg-gray-50 transition-colors">
-                                                 <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                                            <TableRow key={expense.id}>
+                                                <TableCell className="text-gray-600">
                                                     {formatDate(expense.date)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
+                                                </TableCell>
+                                                <TableCell className="text-gray-900 font-medium">
                                                     {expense.description}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                </TableCell>
+                                                <TableCell>
                                                     <Badge variant="default" className="bg-slate-100 text-slate-800">
                                                         {expense.category}
                                                     </Badge>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                                                </TableCell>
+                                                <TableCell className="text-gray-600">
                                                     {expense.merchant || '-'}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                                                </TableCell>
+                                                <TableCell className="font-semibold text-gray-900">
                                                     {formatCurrency(expense.amount)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                </TableCell>
+                                                <TableCell className="text-right">
                                                     {expense.receipt_path ? (
                                                         <a href={expense.receipt_path} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
                                                             <Receipt className="w-5 h-5 inline" />
@@ -133,18 +118,19 @@ export default function Expenses({ expenses, filters }: ExpensesProps) {
                                                     ) : (
                                                         <span className="text-gray-400">No Receipt</span>
                                                     )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                </TableCell>
+                                                <TableCell className="text-right">
                                                     <Link href={route('expenses.show', expense.id)}>
                                                         <Button variant="ghost" size="sm">
                                                             View
                                                         </Button>
                                                     </Link>
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         ))}
-                                    </tbody>
-                                </table>
+                                    </TableBody>
+                                </Table>
+                            </div>
                             </div>
                         </CardContent>
                     </Card>

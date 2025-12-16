@@ -23,7 +23,7 @@ export default function Card({
     return (
         <div
             className={clsx(
-                'bg-white rounded-xl border border-slate-200/60 shadow-sm transition-all duration-200',
+                'bg-white rounded-xl border border-slate-200 shadow-sm transition-all duration-200',
                 paddingClasses[padding],
                 hoverable && 'hover:shadow-md hover:-translate-y-0.5',
                 className
@@ -39,7 +39,7 @@ interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {}
 
 export function CardHeader({ children, className, ...props }: CardHeaderProps) {
     return (
-        <div className={clsx('mb-4', className)} {...props}>
+        <div className={clsx('p-6', className)} {...props}>
             {children}
         </div>
     );
@@ -49,7 +49,7 @@ interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
 
 export function CardTitle({ children, className, ...props }: CardTitleProps) {
     return (
-        <h3 className={clsx('text-lg font-heading font-semibold text-gray-900', className)} {...props}>
+        <h3 className={clsx('text-lg font-heading font-semibold text-slate-900', className)} {...props}>
             {children}
         </h3>
     );
@@ -59,7 +59,7 @@ interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
 
 export function CardContent({ children, className, ...props }: CardContentProps) {
     return (
-        <div className={clsx('text-gray-700', className)} {...props}>
+        <div className={clsx('p-6 pt-0 text-slate-700', className)} {...props}>
             {children}
         </div>
     );
@@ -69,7 +69,7 @@ interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
 
 export function CardFooter({ children, className, ...props }: CardFooterProps) {
     return (
-        <div className={clsx('mt-4 pt-4 border-t border-gray-200', className)} {...props}>
+        <div className={clsx('p-6 flex items-center border-t border-slate-100 bg-slate-50/50 rounded-b-xl', className)} {...props}>
             {children}
         </div>
     );

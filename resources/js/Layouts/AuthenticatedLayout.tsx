@@ -33,7 +33,7 @@ export default function Authenticated({
     return (
         <>
             <FlashMessage />
-            <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex">
+            <div className="min-h-screen font-sans flex">
                 
                 {/* Sidebar */}
                 <div className="print:hidden">
@@ -49,7 +49,7 @@ export default function Authenticated({
                     </div>
 
                     {/* Page Content */}
-                    <main className="flex-1 p-6 md:p-8 animate-fade-in">
+                    <main className="flex-1 p-6 md:p-8 animate-fade-in bg-gray-200 text-white">
                         {header && (
                             <div className="mb-8">
                                  {header}

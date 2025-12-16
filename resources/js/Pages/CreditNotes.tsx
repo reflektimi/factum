@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import Card, { CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
 import Button from '@/Components/ui/Button';
 import StatusBadge from '@/Components/ui/StatusBadge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
 import Input from '@/Components/ui/Input';
 import { Plus, Search, Filter } from 'lucide-react';
 import { PaginatedData, CreditNote } from '@/types/models';
@@ -57,16 +58,18 @@ export default function CreditNotes({ creditNotes, filters }: CreditNotesProps) 
                     <Card className="mb-6">
                         <CardContent className="p-4">
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="flex-1">
-                                    <Input
+                                <div className="flex-1 relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <input
+                                        type="text"
                                         placeholder="Search credit notes..."
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        icon={<Search className="w-5 h-5" />}
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     />
                                 </div>
                                 <select
-                                    className="rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                    className="rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 h-[42px]"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
@@ -81,82 +84,65 @@ export default function CreditNotes({ creditNotes, filters }: CreditNotesProps) 
 
                     {/* Credit Notes Table */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle>All Credit Notes</CardTitle>
-                        </CardHeader>
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Number
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Customer
-                                            </th>
-                                            {/*<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Ref Invoice
-                                            </th>*/}
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Date
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Amount
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Number</TableHead>
+                                            <TableHead>Customer</TableHead>
+                                            {/*<TableHead>Ref Invoice</TableHead>*/}
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Amount</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
                                         {creditNotes.data.length > 0 ? (
                                             creditNotes.data.map((note) => (
-                                                <tr key={note.id} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                <TableRow key={note.id}>
+                                                    <TableCell className="font-medium">
                                                         <Link
                                                             href={route('credit-notes.show', note.id)}
-                                                            className="font-medium text-primary-600 hover:text-primary-700"
+                                                            className="text-primary-600 hover:text-primary-700"
                                                         >
                                                             {note.number}
                                                         </Link>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                                                    </TableCell>
+                                                    <TableCell className="text-gray-900">
                                                         {note.customer?.name}
-                                                    </td>
-                                                    {/*<td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                                                    </TableCell>
+                                                    {/*<TableCell className="text-gray-600">
                                                         {note.invoice ? note.invoice.number : '-'}
-                                                    </td>*/}
-                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                                                    </TableCell>*/}
+                                                    <TableCell className="text-gray-600">
                                                         {formatDate(note.date)}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
+                                                    </TableCell>
+                                                    <TableCell className="font-semibold text-gray-900">
                                                         {formatCurrency(note.amount)}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                    </TableCell>
+                                                    <TableCell>
                                                          <StatusBadge status={note.status} />
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
                                                         <Link href={route('credit-notes.show', note.id)}>
                                                             <Button variant="ghost" size="sm">
                                                                 View
                                                             </Button>
                                                         </Link>
-                                                    </td>
-                                                </tr>
+                                                    </TableCell>
+                                                </TableRow>
                                             ))
                                         ) : (
-                                            <tr>
-                                                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="text-center text-gray-500 h-24">
                                                     No credit notes found.
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         )}
-                                    </tbody>
-                                </table>
+                                    </TableBody>
+                                </Table>
                             </div>
                         </CardContent>
                     </Card>

@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import Card, { CardContent, CardHeader, CardTitle, CardFooter } from '@/Components/ui/Card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
 import Input from '@/Components/ui/Input';
 import Select from '@/Components/ui/Select';
 import Button from '@/Components/ui/Button';
@@ -97,10 +98,10 @@ export default function Edit({ invoice, customers }: EditInvoiceProps) {
             header={
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href={route('invoices.index')} className="text-slate-500 hover:text-slate-700">
+                        <Link href={route('invoices.index')} className="text-gray-500 hover:text-gray-700">
                             <ArrowLeft className="w-6 h-6" />
                         </Link>
-                        <h2 className="text-xl font-semibold leading-tight text-slate-800 font-heading">
+                        <h2 className="text-xl font-semibold leading-tight text-gray-800 font-heading">
                             Edit Invoice {invoice.number}
                         </h2>
                     </div>
@@ -110,22 +111,24 @@ export default function Edit({ invoice, customers }: EditInvoiceProps) {
             <Head title={`Edit Invoice ${invoice.number}`} />
 
             <div className="py-8">
-                <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <form onSubmit={handleSubmit}>
-                        <div className="grid gap-6 md:grid-cols-3">
-                            <div className="md:col-span-2 space-y-6">
+                        <div className="grid grid-cols-12 gap-6">
+                            {/* Left Column - 70% */}
+                            <div className="col-span-12 lg:col-span-8 space-y-6">
                                 {/* Invoice Details */}
                                 <Card>
-                                    <CardHeader>
-                                        <CardTitle>Invoice Details</CardTitle>
+                                    <CardHeader className="pb-3 border-b border-gray-100">
+                                        <CardTitle className="text-base font-semibold">Invoice Details</CardTitle>
                                     </CardHeader>
-                                    <CardContent className="grid gap-4 sm:grid-cols-2">
+                                    <CardContent className="grid gap-6 sm:grid-cols-2 pt-6">
                                         <div className="sm:col-span-2">
                                             <Select
                                                 label="Customer"
                                                 value={data.customer_id}
                                                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setData('customer_id', e.target.value)}
                                                 error={errors.customer_id}
+                                                className="rounded-md"
                                                 options={[
                                                     { label: 'Select a customer', value: '' },
                                                     ...customers.map(c => ({ label: c.name, value: c.id.toString() }))
@@ -138,6 +141,7 @@ export default function Edit({ invoice, customers }: EditInvoiceProps) {
                                             value={data.date}
                                             onChange={(e) => setData('date', e.target.value)}
                                             error={errors.date}
+                                            className="rounded-md"
                                         />
                                         <Input
                                             label="Due Date"
@@ -145,12 +149,14 @@ export default function Edit({ invoice, customers }: EditInvoiceProps) {
                                             value={data.due_date}
                                             onChange={(e) => setData('due_date', e.target.value)}
                                             error={errors.due_date}
+                                            className="rounded-md"
                                         />
                                          <Select
                                             label="Status"
                                             value={data.status}
                                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setData('status', e.target.value as 'pending' | 'paid' | 'overdue')}
                                             error={errors.status}
+                                            className="rounded-md"
                                             options={[
                                                 { label: 'Pending', value: 'pending' },
                                                 { label: 'Paid', value: 'paid' },
@@ -161,88 +167,116 @@ export default function Edit({ invoice, customers }: EditInvoiceProps) {
                                 </Card>
 
                                 {/* Items */}
-                                <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between">
-                                        <CardTitle>Items</CardTitle>
+                                <Card className="overflow-hidden">
+                                     <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100 bg-gray-50/50">
+                                        <CardTitle className="text-base font-semibold">Items</CardTitle>
                                         <Button type="button" variant="secondary" size="sm" onClick={addItem} icon={<Plus className="w-4 h-4"/>}>
                                             Add Item
                                         </Button>
                                     </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {data.items.map((item, index) => (
-                                            <div key={index} className="flex gap-4 items-start p-4 bg-slate-50 rounded-lg animate-fade-in">
-                                                <div className="flex-1 space-y-4 sm:space-y-0 sm:flex sm:gap-4">
-                                                    <div className="flex-[2]">
-                                                        <Input
-                                                            placeholder="Description"
-                                                            value={item.description}
-                                                            onChange={(e) => updateItem(index, 'description', e.target.value)}
-                                                            aria-label="Description"
-                                                        />
-                                                    </div>
-                                                    <div className="w-20">
-                                                        <Input
-                                                            type="number"
-                                                            placeholder="Qty"
-                                                            min="1"
-                                                            value={item.quantity}
-                                                            onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
-                                                            aria-label="Quantity"
-                                                        />
-                                                    </div>
-                                                    <div className="w-32">
-                                                        <Input
-                                                            type="number"
-                                                            placeholder="Price"
-                                                            min="0"
-                                                            step="0.01"
-                                                            value={item.price}
-                                                            onChange={(e) => updateItem(index, 'price', parseFloat(e.target.value))}
-                                                            aria-label="Price"
-                                                        />
-                                                    </div>
-                                                    <div className="w-32 pt-2 text-right font-semibold text-slate-900">
-                                                        {formatCurrency(item.total)}
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeItem(index)}
-                                                    className="text-slate-400 hover:text-red-500 transition-colors mt-2"
-                                                >
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                        {errors.items && <p className="text-sm text-red-600">{errors.items}</p>}
-                                    </CardContent>
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
+                                                    <TableHead className="w-[45%] font-bold text-gray-900">Description</TableHead>
+                                                    <TableHead className="w-[15%] font-bold text-gray-900 text-right">Quantity</TableHead>
+                                                    <TableHead className="w-[20%] font-bold text-gray-900 text-right">Rate</TableHead>
+                                                    <TableHead className="w-[15%] font-bold text-gray-900 text-right">Amount</TableHead>
+                                                    <TableHead className="w-[5%]"></TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {data.items.map((item, index) => (
+                                                    <TableRow key={index} className="hover:bg-gray-50/30">
+                                                        <TableCell className="align-top">
+                                                            <Input
+                                                                placeholder="Description"
+                                                                value={item.description}
+                                                                onChange={(e) => updateItem(index, 'description', e.target.value)}
+                                                                aria-label="Description"
+                                                                className="rounded-md border-gray-300 focus:border-indigo-500"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="align-top">
+                                                            <Input
+                                                                type="number"
+                                                                min="1"
+                                                                value={item.quantity}
+                                                                onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
+                                                                aria-label="Quantity"
+                                                                className="rounded-md text-right border-gray-300 focus:border-indigo-500"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="align-top">
+                                                            <Input
+                                                                type="number"
+                                                                min="0"
+                                                                step="0.01"
+                                                                value={item.price}
+                                                                onChange={(e) => updateItem(index, 'price', parseFloat(e.target.value))}
+                                                                aria-label="Price"
+                                                                className="rounded-md text-right border-gray-300 focus:border-indigo-500"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="text-right font-medium text-gray-900 pt-5 align-top">
+                                                            {formatCurrency(item.total)}
+                                                        </TableCell>
+                                                        <TableCell className="text-right align-top pt-4">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeItem(index)}
+                                                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                    {errors.items && (
+                                        <div className="p-4 bg-red-50 text-red-600 text-sm border-t border-red-100">
+                                            {errors.items}
+                                        </div>
+                                    )}
                                 </Card>
                             </div>
 
-                            <div className="space-y-6">
-                                {/* Summary */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Summary</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="flex justify-between items-center text-lg font-bold text-slate-900">
-                                            <span>Total Amount</span>
-                                            <span>{formatCurrency(data.total_amount)}</span>
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter className="flex justify-end border-t border-slate-100 pt-4">
-                                        <Button
-                                            type="submit"
-                                            variant="primary"
-                                            loading={processing}
-                                            className="w-full"
-                                            icon={<Save className="w-5 h-5" />}
-                                        >
-                                            Save Changes
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
+                            {/* Right Column - 30% - Sticky Summary */}
+                            <div className="col-span-12 lg:col-span-4 relative">
+                                <div className="lg:sticky lg:top-6 space-y-6">
+                                    <Card className="border-t-4 border-t-indigo-500">
+                                        <CardHeader className="pb-3 border-b border-gray-100">
+                                            <CardTitle className="text-base font-semibold">Summary</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4 pt-6">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-500">Subtotal</span>
+                                                <span className="font-medium">{formatCurrency(data.total_amount)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-sm text-gray-500">
+                                                <span>Tax (0%)</span>
+                                                <span>$0.00</span>
+                                            </div>
+                                            <div className="pt-4 border-t border-gray-100 flex justify-between items-end">
+                                                <span className="text-base font-bold text-gray-900">Total Amount</span>
+                                                <span className="text-2xl font-bold text-indigo-600">{formatCurrency(data.total_amount)}</span>
+                                            </div>
+                                        </CardContent>
+                                        <CardFooter className="pt-4 pb-6 px-6 border-0">
+                                            <Button
+                                                type="submit"
+                                                variant="primary"
+                                                loading={processing}
+                                                className="w-full h-12 text-base font-bold bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200"
+                                                icon={<Save className="w-5 h-5" />}
+                                            >
+                                                Save Changes
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
+                                </div>
                             </div>
                         </div>
                     </form>

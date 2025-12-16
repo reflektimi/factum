@@ -58,25 +58,31 @@ export default function Invoices({ invoices, filters }: InvoicesProps) {
         >
             <Head title="Invoices" />
 
-            {/* Filters Bar */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6 items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
-                 <div className="relative flex-1 w-full">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                        type="search"
-                        placeholder="Filter invoices..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 text-sm border-0 bg-transparent focus:ring-0 placeholder:text-gray-400"
-                    />
-                </div>
-                <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
-                <Button variant="ghost" size="sm" icon={<Filter className="w-4 h-4" />}>
-                    Status
-                </Button>
-            </div>
+            {/* Filters */}
+            <Card className="mb-6">
+                <CardContent className="p-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Filter invoices..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            />
+                        </div>
+                        <Button variant="secondary" icon={<Filter className="w-5 h-5" />}>
+                            Status
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Invoices Table */}
+            <Card>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -150,6 +156,9 @@ export default function Invoices({ invoices, filters }: InvoicesProps) {
                     )}
                 </TableBody>
             </Table>
+            </div>
+            </CardContent>
+            </Card>
         </AuthenticatedLayout>
     );
 }

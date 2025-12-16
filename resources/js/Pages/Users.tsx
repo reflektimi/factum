@@ -4,6 +4,7 @@ import Card, { CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
 import Button from '@/Components/ui/Button';
 import Badge from '@/Components/ui/Badge';
 import Input from '@/Components/ui/Input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
 import Select from '@/Components/ui/Select';
 import Modal from '@/Components/ui/Modal';
 import { PaginatedData, User } from '@/types/models';
@@ -112,25 +113,23 @@ export default function Users({ users, filters }: UsersProps) {
 
                     {/* Users Table */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle>All Users</CardTitle>
-                        </CardHeader>
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Name</TableHead>
+                                            <TableHead>Role</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Joined</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
                                         {users.data.map((user) => (
-                                            <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                            <TableRow key={user.id}>
+                                                <TableCell>
                                                     <div className="flex items-center">
                                                         <div className="h-10 w-10 flex-shrink-0">
                                                             <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold">
@@ -142,21 +141,21 @@ export default function Users({ users, filters }: UsersProps) {
                                                             <div className="text-sm text-gray-500">{user.email}</div>
                                                         </div>
                                                     </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                </TableCell>
+                                                <TableCell>
                                                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 uppercase">
                                                         {user.role}
                                                     </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                </TableCell>
+                                                <TableCell>
                                                     <Badge variant={user.active ? 'success' : 'danger'} status={user.active ? 'active' : 'inactive'}>
                                                         {user.active ? 'Active' : 'Inactive'}
                                                     </Badge>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                </TableCell>
+                                                <TableCell className="text-sm text-gray-500">
                                                     {new Date(user.created_at).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                </TableCell>
+                                                <TableCell className="text-right">
                                                     <div className="flex justify-end gap-2">
                                                         <button 
                                                             className="text-gray-400 hover:text-gray-600"
@@ -171,11 +170,12 @@ export default function Users({ users, filters }: UsersProps) {
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     </div>
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         ))}
-                                    </tbody>
-                                </table>
+                                    </TableBody>
+                                </Table>
+                            </div>
                             </div>
                         </CardContent>
                     </Card>

@@ -28,19 +28,19 @@ export function TableBody({ className, children, ...props }: HTMLAttributes<HTML
     );
 }
 
-export function TableRow({ className, children, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-    return (
-        <tr 
-            className={clsx(
-                "border-b transition-colors hover:bg-slate-50/50 data-[state=selected]:bg-slate-50",
-                className
-            )} 
-            {...props}
-        >
-            {children}
-        </tr>
-    );
-}
+export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(({ className, children, ...props }, ref) => (
+    <tr
+        ref={ref}
+        className={clsx(
+            "border-b border-slate-200 transition-colors hover:bg-slate-100/50 data-[state=selected]:bg-slate-100",
+            className
+        )}
+        {...props}
+    >
+        {children}
+    </tr>
+));
+TableRow.displayName = "TableRow";
 
 export function TableHead({ className, children, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
     return (

@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #app {
+    height: 100%;
+  }
+
   /* Custom Scrollbar for sleek look */
   ::-webkit-scrollbar {
     width: 6px;
@@ -12,7 +16,7 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+    @apply bg-slate-700 rounded-full hover:bg-slate-600 transition-colors;
   }
 }
 
