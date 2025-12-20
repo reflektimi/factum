@@ -13,9 +13,11 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Application Routes](#application-routes)
+- [Documentation](documentation.md)
+- [User Guide](user_documentation.md)
+- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
-- [Roadmap](#roadmap)
 
 ## Features
 
@@ -103,6 +105,12 @@ Follow these steps to set up the project locally for development.
 
 7.  **Access the App**
     Open your browser and navigate to `http://127.0.0.1:8000`.
+
+## Documentation
+
+For detailed information, please refer to:
+- **[Technical Documentation](documentation.md)**: Architecture, Schema, and Deployment details.
+- **[User Guide](user_documentation.md)**: Manual for end-users on how to use the platform.
 
 ## Usage
 
