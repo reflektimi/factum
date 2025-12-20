@@ -6,6 +6,8 @@ use App\Models\Payment;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -14,10 +16,12 @@ class PaymentController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Payment::class);
+
         $query = Payment::with(['invoice', 'customer']);
         
         // Search
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->whereHas('invoice', function($q) use ($search) {
@@ -30,7 +34,7 @@ class PaymentController extends Controller
         }
         
         // Filter by status
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         
@@ -47,6 +51,8 @@ class PaymentController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Payment::class);
+
         $invoices = Invoice::where('status', '!=', 'paid')
             ->with('customer')
             ->get()
@@ -70,8 +76,13 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Payment::class);
+
         $validated = $request->validate([
-            'invoice_id' => 'required|exists:invoices,id',
+            'invoice_id' => [
+                'required',
+                Rule::exists('invoices', 'id')->where(fn ($q) => $q->where('user_id', Auth::id()))
+            ],
             'amount' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
             'date' => 'required|date',
@@ -91,7 +102,7 @@ class PaymentController extends Controller
             }
         }
         
-        return back()->with('success', 'Payment recorded successfully.');
+        return redirect()->route('payments.show', $payment->id)->with('success', 'Payment recorded successfully.');
     }
 
     /**
@@ -99,8 +110,13 @@ class PaymentController extends Controller
      */
     public function show(Payment $payment)
     {
+        $this->authorize('view', $payment);
+        
+        $payment->load(['invoice.customer', 'activityLogs.user']);
+        $payment->logActivity('viewed');
+
         return Inertia::render('Payments/Show', [
-            'payment' => $payment->load('invoice.customer'),
+            'payment' => $payment,
         ]);
     }
 
@@ -109,7 +125,10 @@ class PaymentController extends Controller
      */
     public function edit(Payment $payment)
     {
+        $this->authorize('update', $payment);
+
         $payment->load('invoice.customer');
+        $payment->logActivity('viewed');
         
         return Inertia::render('Payments/Edit', [
             'payment' => $payment,
@@ -121,6 +140,8 @@ class PaymentController extends Controller
      */
     public function update(Request $request, Payment $payment)
     {
+        $this->authorize('update', $payment);
+
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
@@ -140,7 +161,7 @@ class PaymentController extends Controller
             $invoice->update(['status' => 'pending']);
         }
         
-        return back()->with('success', 'Payment updated successfully.');
+        return redirect()->route('payments.show', $payment->id)->with('success', 'Payment updated successfully.');
     }
 
     /**
@@ -148,6 +169,8 @@ class PaymentController extends Controller
      */
     public function destroy(Payment $payment)
     {
+        $this->authorize('delete', $payment);
+
         $payment->delete();
         
         return back()->with('success', 'Payment deleted successfully.');
