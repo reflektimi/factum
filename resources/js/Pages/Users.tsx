@@ -14,6 +14,8 @@ import { Plus, Search, Trash2, Edit2, UserPlus, Mail, Shield, Calendar, MoreVert
 import { useState, FormEventHandler, useEffect } from 'react';
 import clsx from 'clsx';
 import Dropdown from '@/Components/Dropdown';
+import DeleteConfirmation from '@/Components/DeleteConfirmation';
+import Pagination from '@/Components/ui/Pagination';
 import ConfirmModal from '@/Components/ui/ConfirmModal';
 
 interface UsersProps {
@@ -228,6 +230,8 @@ export default function Users({ users, filters }: UsersProps) {
                     </TableBody>
                 </Table>
             </Card>
+
+            <Pagination data={users} />
 
             <Modal
                 isOpen={isCreateModalOpen}

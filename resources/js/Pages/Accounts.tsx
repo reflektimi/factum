@@ -13,6 +13,7 @@ import { Plus, Search, Mail, Phone, MoreVertical, Edit2, Trash2, User, Building2
 import { PaginatedData, Account } from '@/types/models';
 import { useState, useEffect } from 'react';
 import DeleteConfirmation from '@/Components/DeleteConfirmation';
+import Pagination from '@/Components/ui/Pagination';
 import Dropdown from '@/Components/Dropdown';
 import clsx from 'clsx';
 
@@ -223,6 +224,8 @@ export default function Accounts({ accounts, filters }: AccountsProps) {
                     </TableBody>
                 </Table>
             </Card>
+
+            <Pagination data={accounts} />
 
             <DeleteConfirmation
                 show={deleteId !== null}

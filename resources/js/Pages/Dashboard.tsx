@@ -1,12 +1,13 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import Card, { CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
 import Badge from '@/Components/ui/Badge';
+import Button from '@/Components/ui/Button';
 import InsightCard from '@/Components/InsightCard';
 import CashFlowForecastCard from '@/Components/CashFlowForecastCard';
 import PageHeader from '@/Components/ui/PageHeader';
 import { formatCurrency, formatNumber } from '@/utils/format';
-import { FileText, CreditCard, TrendingUp, AlertCircle, ArrowUpRight, DollarSign, Activity } from 'lucide-react';
+import { FileText, CreditCard, TrendingUp, AlertCircle, ArrowUpRight, DollarSign, Activity, RefreshCw } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DashboardStats {
@@ -35,6 +36,18 @@ export default function Dashboard({ stats, recentInvoices, recentPayments, chart
             <PageHeader 
                 title="Dashboard" 
                 subtitle="Overview of your financial performance." 
+                actions={
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.post(route('forecast.refresh-all'), {}, {
+                            preserveScroll: true,
+                        })}
+                        icon={<RefreshCw className="w-4 h-4" />}
+                    >
+                        Refresh Data
+                    </Button>
+                }
             />
 
             {/* Stats Grid */}

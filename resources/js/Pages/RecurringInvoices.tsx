@@ -13,6 +13,7 @@ import { PaginatedData, RecurringInvoice } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { useState, useEffect } from 'react';
 import DeleteConfirmation from '@/Components/DeleteConfirmation';
+import Pagination from '@/Components/ui/Pagination';
 import Dropdown from '@/Components/Dropdown';
 import clsx from 'clsx';
 
@@ -230,6 +231,8 @@ export default function RecurringInvoices({ recurringInvoices, filters }: Recurr
                     </TableBody>
                 </Table>
             </Card>
+
+            <Pagination data={recurringInvoices} />
 
             <DeleteConfirmation
                 show={deleteId !== null}

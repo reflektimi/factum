@@ -12,6 +12,7 @@ import { formatCurrency, formatDate } from '@/utils/format';
 import { Plus, Search, FileText, MoreVertical, ExternalLink, Edit2, Trash2, Calendar, User, DollarSign, Activity } from 'lucide-react';
 import Dropdown from '@/Components/Dropdown';
 import DeleteConfirmation from '@/Components/DeleteConfirmation';
+import Pagination from '@/Components/ui/Pagination';
 import { PaginatedData, Invoice } from '@/types/models';
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
@@ -237,6 +238,8 @@ export default function Invoices({ invoices, filters }: InvoicesProps) {
                     </TableBody>
                 </Table>
             </Card>
+
+            <Pagination data={invoices} />
 
             <DeleteConfirmation
                 show={deleteId !== null}

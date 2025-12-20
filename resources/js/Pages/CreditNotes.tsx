@@ -2,6 +2,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import Card, { CardContent } from '@/Components/ui/Card';
 import Badge from '@/Components/ui/Badge';
+import DeleteConfirmation from '@/Components/DeleteConfirmation';
+import Pagination from '@/Components/ui/Pagination';
 import Button from '@/Components/ui/Button';
 import PageHeader from '@/Components/ui/PageHeader';
 import Toolbar from '@/Components/ui/Toolbar';
@@ -193,6 +195,8 @@ export default function CreditNotes({ creditNotes, filters }: CreditNotesProps) 
                     </TableBody>
                 </Table>
             </Card>
+
+            <Pagination data={creditNotes} />
         </AuthenticatedLayout>
     );
 }

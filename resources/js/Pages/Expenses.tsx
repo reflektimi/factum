@@ -13,6 +13,7 @@ import { PaginatedData, Expense } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { useState, useEffect } from 'react';
 import DeleteConfirmation from '@/Components/DeleteConfirmation';
+import Pagination from '@/Components/ui/Pagination';
 import Dropdown from '@/Components/Dropdown';
 import clsx from 'clsx';
 
@@ -232,6 +233,8 @@ export default function Expenses({ expenses, filters }: ExpensesProps) {
                     </TableBody>
                 </Table>
             </Card>
+
+            <Pagination data={expenses} />
 
             <DeleteConfirmation
                 show={deleteId !== null}

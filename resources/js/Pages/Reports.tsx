@@ -6,6 +6,7 @@ import Button from '@/Components/ui/Button';
 import PageHeader from '@/Components/ui/PageHeader';
 import Input from '@/Components/ui/Input';
 import { formatDate } from '@/utils/format';
+import Pagination from '@/Components/ui/Pagination';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
 import { Plus, TrendingUp, DollarSign, Activity, Calendar, FileText, ChevronRight, BarChart3, Clock, User as UserIcon } from 'lucide-react';
 import { PaginatedData, Report } from '@/types/models';
@@ -261,6 +262,8 @@ export default function Reports({ reports }: ReportsProps) {
                         </TableBody>
                     </Table>
                 </Card>
+
+                <Pagination data={reports} />
             </div>
         </AuthenticatedLayout>
     );

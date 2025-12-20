@@ -14,6 +14,7 @@ import { PaginatedData, Quote } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { useState, useEffect } from 'react';
 import DeleteConfirmation from '@/Components/DeleteConfirmation';
+import Pagination from '@/Components/ui/Pagination';
 import clsx from 'clsx';
 
 interface QuotesProps {
@@ -240,6 +241,8 @@ export default function Quotes({ quotes, filters }: QuotesProps) {
                     </TableBody>
                 </Table>
             </Card>
+
+            <Pagination data={quotes} />
 
             <DeleteConfirmation
                 show={deleteId !== null}
