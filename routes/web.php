@@ -50,6 +50,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
+    // Forecast & Insights Generation
+    Route::post('/forecast/cashflow', [App\Http\Controllers\ForecastController::class, 'generateCashFlow'])->name('forecast.cashflow');
+    Route::post('/forecast/insights', [App\Http\Controllers\ForecastController::class, 'generateInsights'])->name('forecast.insights');
+    Route::post('/forecast/refresh-all', [App\Http\Controllers\ForecastController::class, 'refreshAll'])->name('forecast.refresh-all');
+
     Route::resource('users', App\Http\Controllers\UserController::class);
 });
 
