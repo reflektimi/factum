@@ -165,14 +165,14 @@ export default function Dashboard({ stats, recentInvoices, recentPayments, chart
                                         />
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <Tooltip 
-                                            contentStyle={{ 
-                                                backgroundColor: '#fff', 
-                                                border: 'none', 
-                                                borderRadius: '12px',
-                                                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
-                                            }}
-                                            formatter={(value: number) => [formatCurrency(value), 'Revenue']}
-                                        />
+                                        contentStyle={{ 
+                                            backgroundColor: '#fff', 
+                                            border: 'none', 
+                                            borderRadius: '12px',
+                                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+                                        }}
+                                        formatter={(value: any) => [formatCurrency(Number(value || 0)), 'Revenue']}
+                                    />
                                         <Area 
                                             type="monotone" 
                                             dataKey="revenue" 
