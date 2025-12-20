@@ -30,14 +30,21 @@ else
 fi
 
 
-# Create storage link
+# Remove existing storage symlink if it exists, then create a new one
 echo "🔗 Creating storage symlink..."
-php artisan storage:link || true
+if [ -L "public/storage" ] || [ -e "public/storage" ]; then
+    rm -rf public/storage
+fi
+php artisan storage:link
 
 # Clear all caches to ensure fresh start
 echo "🧹 Clearing caches..."
 php artisan cache:clear
 php artisan view:clear
+
+# Build frontend assets after setting correct APP_URL
+echo "🛠️ Building frontend assets..."
+npm run build
 
 echo "✅ Deployment complete! Starting server..."
 
