@@ -1,4 +1,8 @@
 #!/bin/sh
+    #!/bin/sh
+
+export DB_CONNECTION=pgsql
+export APP_URL=https://factum-app.onrender.com
 
 echo "🚀 Starting Factum deployment..."
 
