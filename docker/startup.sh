@@ -42,9 +42,17 @@ echo "🧹 Clearing caches..."
 php artisan cache:clear
 php artisan view:clear
 
-# Build frontend assets after setting correct APP_URL
+
+# Build frontend assets from project root
+cd /var/www
 echo "🛠️ Building frontend assets..."
 npm run build
+
+# Check for Vite manifest
+if [ ! -f public/build/manifest.json ]; then
+    echo "Vite manifest not found! Build failed."
+    exit 1
+fi
 
 echo "✅ Deployment complete! Starting server..."
 
