@@ -16,8 +16,15 @@ php artisan route:cache
 php artisan view:cache
 
 # Run database migrations
-echo "🗄️  Running database migrations..."
-php artisan migrate --force --no-interaction
+echo "🗄️ Running database migrations..."
+
+if [ "$RUN_SEEDER" = "true" ]; then
+    echo "🌱 Fresh migrate + seed (FIRST DEPLOY ONLY)"
+    php artisan migrate:fresh --seed --force
+else
+    php artisan migrate --force
+fi
+
 
 # Create storage link
 echo "🔗 Creating storage symlink..."
@@ -31,4 +38,4 @@ php artisan view:clear
 echo "✅ Deployment complete! Starting server..."
 
 # Start Laravel development server on port 8080 (Render default)
-php artisan serve --host=0.0.0.0 --port=8080
+php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
