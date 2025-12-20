@@ -19,6 +19,7 @@ class ExpenseFactory extends Factory
         $categories = ['Office', 'Travel', 'Software', 'Utilities', 'Marketing', 'Contractors'];
         
         return [
+            'user_id' => \App\Models\User::factory(),
             'description' => $this->faker->bs(),
             'amount' => $this->faker->randomFloat(2, 10, 5000),
             'date' => $this->faker->dateTimeBetween('-6 months', 'now'),

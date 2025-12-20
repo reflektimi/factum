@@ -19,6 +19,7 @@ class AccountFactory extends Factory
         $type = $this->faker->randomElement(['customer', 'supplier']);
         
         return [
+            'user_id' => \App\Models\User::factory(),
             'name' => $this->faker->company(),
             'type' => $type,
             'contact_info' => [

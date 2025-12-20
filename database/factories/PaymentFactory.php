@@ -19,6 +19,7 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => \App\Models\User::factory(),
             'invoice_id' => Invoice::factory(),
             'customer_id' => function (array $attributes) {
                 return Invoice::find($attributes['invoice_id'])->customer_id;

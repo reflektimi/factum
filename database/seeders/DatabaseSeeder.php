@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $users = collect([$admin, $accountant]);
+        $users = collect([$admin]); // Only use Admin for demo data visibility
 
         // 2. Company Settings
         if (Setting::count() === 0) {
@@ -63,15 +63,15 @@ class DatabaseSeeder extends Seeder
 
         // 2. Create Customers (Accounts)
         // High Value: 3 customers
-        $highValueCustomers = Account::factory()->customer()->count(3)->create(['name' => function() { return 'VIP - ' . fake()->company(); }]);
+        $highValueCustomers = Account::factory()->customer()->recycle($users)->count(3)->create(['name' => function() { return 'VIP - ' . fake()->company(); }]);
         // Regular: 20 customers
-        $regularCustomers = Account::factory()->customer()->count(20)->create();
+        $regularCustomers = Account::factory()->customer()->recycle($users)->count(20)->create();
         
         $allCustomers = $highValueCustomers->merge($regularCustomers);
 
         // 3. Create Suppliers (Accounts)
         // 5 Suppliers
-        $suppliers = Account::factory()->supplier()->count(5)->create();
+        $suppliers = Account::factory()->supplier()->recycle($users)->count(5)->create();
 
         // 5. Generate Invoices & History
         foreach ($allCustomers as $index => $customer) {
@@ -85,6 +85,7 @@ class DatabaseSeeder extends Seeder
             }
             
             Invoice::factory()
+                ->recycle($users)
                 ->count($invoiceCount)
                 ->for($customer)
                 ->state(function (array $attributes) {
@@ -98,6 +99,7 @@ class DatabaseSeeder extends Seeder
                     // 5a. Handle Payments for Paid Invoices
                     if ($invoice->status === 'paid') {
                         Payment::factory()->create([
+                            'user_id' => $invoice->user_id,
                             'invoice_id' => $invoice->id,
                             'customer_id' => $invoice->customer_id,
                             'amount' => $invoice->total_amount,
@@ -108,6 +110,7 @@ class DatabaseSeeder extends Seeder
                     // 5b. Handle Partial Payments for some Sent invoices
                     elseif ($invoice->status === 'sent' && rand(0, 100) > 80) {
                         Payment::factory()->create([
+                            'user_id' => $invoice->user_id,
                             'invoice_id' => $invoice->id,
                             'customer_id' => $invoice->customer_id,
                             'amount' => $invoice->total_amount * 0.5,
@@ -124,18 +127,21 @@ class DatabaseSeeder extends Seeder
 
         // 7. Generate Quotes (Current & Converted)
         Quote::factory()
+            ->recycle($users)
             ->count(30)
             ->recycle($allCustomers)
             ->create();
 
         // 8. Recurring Logic
         RecurringInvoice::factory()
+            ->recycle($users)
             ->count(15)
             ->recycle($allCustomers)
             ->create();
 
         // 9. Credit Notes
         CreditNote::factory()
+            ->recycle($users)
             ->count(10)
             ->recycle($allCustomers)
             ->create();
