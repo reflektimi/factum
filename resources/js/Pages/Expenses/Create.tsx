@@ -1,11 +1,13 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
-import Card, { CardContent, CardHeader, CardTitle, CardFooter } from '@/Components/ui/Card';
+import Card, { CardContent } from '@/Components/ui/Card';
 import Input from '@/Components/ui/Input';
 import Select from '@/Components/ui/Select';
 import Button from '@/Components/ui/Button';
-import { Save, ArrowLeft, Upload } from 'lucide-react';
+import PageHeader from '@/Components/ui/PageHeader';
+import { Save, ArrowLeft, Upload, FileText, DollarSign, Calendar, Tag, Store, Image as ImageIcon, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { FormEventHandler } from 'react';
+import { formatCurrency } from '@/utils/format';
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -25,149 +27,196 @@ export default function Create() {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center gap-4">
-                    <Link href={route('expenses.index')} className="text-gray-500 hover:text-gray-700">
-                        <ArrowLeft className="w-6 h-6" />
-                    </Link>
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800 font-heading">
-                        Record New Expense
-                    </h2>
-                </div>
-            }
-        >
-            <Head title="New Expense" />
+        <AuthenticatedLayout>
+            <Head title="Log Disbursement" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-12 gap-6">
-                            {/* Left Column - 70% */}
-                            <div className="col-span-12 lg:col-span-8 space-y-6">
-                                <Card>
-                                    <CardHeader className="pb-3 border-b border-gray-100">
-                                        <CardTitle className="text-base font-semibold">Expense Details</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-6 pt-6">
-                                        <Input
-                                            label="Description"
-                                            value={data.description}
-                                            onChange={(e) => setData('description', e.target.value)}
-                                            error={errors.description}
-                                            placeholder="e.g. Office Supplies"
-                                            className="rounded-md"
-                                        />
+            <PageHeader
+                title={
+                    <div className="flex items-center gap-3">
+                        <Link 
+                            href={route('expenses.index')}
+                            className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary-600 hover:border-primary-100 transition-all shadow-sm group"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </Link>
+                        <span>Record Expense</span>
+                    </div>
+                }
+                subtitle="Track corporate spending and manage digital receipts"
+            />
 
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <Input
-                                                label="Amount"
-                                                type="number"
-                                                step="0.01"
-                                                value={data.amount}
-                                                onChange={(e) => setData('amount', e.target.value)}
-                                                error={errors.amount}
-                                                placeholder="0.00"
-                                                className="rounded-md"
-                                            />
-                                            <Input
-                                                label="Date"
-                                                type="date"
-                                                value={data.date}
-                                                onChange={(e) => setData('date', e.target.value)}
-                                                error={errors.date}
-                                                className="rounded-md"
-                                            />
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                             <Select
-                                                label="Category"
-                                                value={data.category}
-                                                onChange={(e) => setData('category', e.target.value)}
-                                                error={errors.category}
-                                                className="rounded-md"
-                                                options={[
-                                                    { label: 'Select Category', value: '' },
-                                                    { label: 'Office', value: 'Office' },
-                                                    { label: 'Travel', value: 'Travel' },
-                                                    { label: 'Meals', value: 'Meals' },
-                                                    { label: 'Utilities', value: 'Utilities' },
-                                                    { label: 'Software', value: 'Software' },
-                                                    { label: 'Equipment', value: 'Equipment' },
-                                                    { label: 'Other', value: 'Other' },
-                                                ]}
-                                            />
-                                            <Input
-                                                label="Merchant (Optional)"
-                                                value={data.merchant}
-                                                onChange={(e) => setData('merchant', e.target.value)}
-                                                error={errors.merchant}
-                                                placeholder="e.g. Amazon"
-                                                className="rounded-md"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Receipt (Image)</label>
-                                            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-indigo-500 transition-colors">
-                                                <div className="space-y-1 text-center">
-                                                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                                                    <div className="flex text-sm text-gray-600">
-                                                        <label htmlFor="receipt-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                                            <span>Upload a file</span>
-                                                            <input 
-                                                                id="receipt-upload" 
-                                                                name="receipt" 
-                                                                type="file" 
-                                                                className="sr-only" 
-                                                                accept="image/*"
-                                                                onChange={(e) => setData('receipt', e.target.files ? e.target.files[0] : null)}
-                                                            />
-                                                        </label>
-                                                        <p className="pl-1">or drag and drop</p>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
-                                                </div>
-                                            </div>
-                                            {data.receipt && <p className="mt-2 text-sm text-green-600">Selected: {data.receipt.name}</p>}
-                                            {errors.receipt && <p className="mt-2 text-sm text-red-600">{errors.receipt}</p>}
-                                        </div>
-
-                                    </CardContent>
-                                </Card>
+            <form onSubmit={handleSubmit} className="relative" noValidate>
+                <div className="grid grid-cols-12 gap-8">
+                    {/* Primary Recording Workspace */}
+                    <div className="col-span-12 lg:col-span-8 space-y-8">
+                        {/* Core Details Card */}
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 px-6 py-3">
+                                <FileText className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expense Parameters</span>
                             </div>
+                            <CardContent className="p-6 space-y-6">
+                                <Input
+                                    label="Disbursement Description"
+                                    value={data.description}
+                                    onChange={(e) => setData('description', e.target.value)}
+                                    error={errors.description}
+                                    placeholder="e.g. Q4 Cloud Infrastructure, Office Supplies..."
+                                    className="h-10 text-sm font-medium"
+                                    icon={<FileText className="w-4 h-4" />}
+                                    required
+                                />
 
-                            {/* Right Column - 30% - Sticky Actions */}
-                            <div className="col-span-12 lg:col-span-4 relative">
-                                <div className="lg:sticky lg:top-6 space-y-6">
-                                    <Card className="border-t-4 border-t-indigo-500">
-                                        <CardHeader className="pb-3 border-b border-gray-100">
-                                            <CardTitle className="text-base font-semibold">Actions</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4 pt-6">
-                                            <Button
-                                                type="submit"
-                                                variant="primary"
-                                                loading={processing}
-                                                className="w-full h-12 text-base font-bold bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200"
-                                                icon={<Save className="w-5 h-5" />}
-                                            >
-                                                Save Expense
-                                            </Button>
-                                             <Link href={route('expenses.index')} className="block">
-                                                <Button variant="secondary" type="button" className="w-full">
-                                                    Cancel
-                                                </Button>
-                                            </Link>
-                                        </CardContent>
-                                    </Card>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Input
+                                        label="Total Amount"
+                                        type="number"
+                                        step="0.01"
+                                        value={data.amount}
+                                        onChange={(e) => setData('amount', e.target.value)}
+                                        error={errors.amount}
+                                        placeholder="0.00"
+                                        className="h-10 font-mono"
+                                        icon={<DollarSign className="w-4 h-4" />}
+                                        required
+                                    />
+                                    <Input
+                                        label="Transaction Date"
+                                        type="date"
+                                        value={data.date}
+                                        onChange={(e) => setData('date', e.target.value)}
+                                        error={errors.date}
+                                        className="h-10"
+                                        icon={<Calendar className="w-4 h-4" />}
+                                        required
+                                    />
                                 </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                     <Select
+                                        label="Budget Category"
+                                        value={data.category}
+                                        onChange={(e) => setData('category', e.target.value)}
+                                        error={errors.category}
+                                        className="h-10"
+                                        icon={<Tag className="w-4 h-4" />}
+                                        required
+                                    >
+                                        <option value="">Select Category...</option>
+                                        <option value="Office">Office & Workspace</option>
+                                        <option value="Travel">Business Travel</option>
+                                        <option value="Meals">Hospitality & Meals</option>
+                                        <option value="Utilities">Utilities & Connectivity</option>
+                                        <option value="Software">SaaS & Infrastructure</option>
+                                        <option value="Marketing">Growth & Marketing</option>
+                                        <option value="Rent">Facility & Rent</option>
+                                        <option value="Equipment">Hardware & Equipment</option>
+                                        <option value="Other">Miscellaneous</option>
+                                    </Select>
+                                    <Input
+                                        label="Merchant Entity"
+                                        value={data.merchant}
+                                        onChange={(e) => setData('merchant', e.target.value)}
+                                        error={errors.merchant}
+                                        placeholder="e.g. AWS, Staples, Uber..."
+                                        className="h-10"
+                                        icon={<Store className="w-4 h-4" />}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Evidence & Receipts Workspace */}
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 px-6 py-3">
+                                <ImageIcon className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Documentary Evidence</span>
                             </div>
-                        </div>
-                    </form>
+                            <CardContent className="p-6">
+                                <div className="p-12 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-amber-300 transition-all group relative cursor-pointer">
+                                    <input 
+                                        id="receipt-upload" 
+                                        name="receipt" 
+                                        type="file" 
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                                        accept="image/*"
+                                        onChange={(e) => setData('receipt', e.target.files ? e.target.files[0] : null)}
+                                    />
+                                    <div className="text-center space-y-4">
+                                        <div className="mx-auto w-20 h-20 rounded-2xl bg-white flex items-center justify-center text-slate-300 group-hover:text-amber-500 group-hover:scale-110 transition-all border border-slate-100 shadow-sm">
+                                            <Upload className="w-8 h-8" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-black text-slate-900 uppercase tracking-widest">
+                                                {data.receipt ? data.receipt.name : 'Click or Drag Receipt'}
+                                            </p>
+                                            <p className="text-[10px] text-slate-400 font-bold">
+                                                Accepted formats: PNG, JPG (Max 2MB)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {errors.receipt && (
+                                    <div className="mt-4 p-4 flex items-center gap-3 bg-red-50 border border-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl animate-in slide-in-from-top-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        {errors.receipt}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Meta & Summary Sidebar */}
+                    <div className="col-span-12 lg:col-span-4 space-y-8">
+                        <Card className="border-none shadow-premium-soft overflow-hidden sticky top-8">
+                            <div className="h-1.5 w-full bg-slate-900"></div>
+                            <CardContent className="p-6 space-y-8">
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Expense Summary</h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gross Disbursement</span>
+                                            <span className="text-2xl font-bold text-slate-900 font-mono tracking-tighter">
+                                                -{formatCurrency(parseFloat(data.amount) || 0)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2 mb-1">
+                                         <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
+                                         <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Audit Context</h3>
+                                    </div>
+                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-[11px] text-slate-500 font-medium leading-relaxed">
+                                        Expenses are categorized for fiscal reporting. Ensure the receipt is clearly legible for tax compliance and internal audits. 
+                                    </div>
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    loading={processing}
+                                    className="w-full h-11 text-xs font-bold uppercase tracking-widest bg-slate-900 hover:bg-slate-800"
+                                    icon={<Save className="w-4 h-4" />}
+                                >
+                                    Record Expense
+                                </Button>
+
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                        <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Compliance Locked</h3>
+                                    </div>
+                                    <p className="text-[9px] text-slate-400 font-medium leading-relaxed px-1 italic">
+                                        Transaction will be recorded in the general ledger immediately upon submission.
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-            </div>
+            </form>
         </AuthenticatedLayout>
     );
 }

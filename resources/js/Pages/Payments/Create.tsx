@@ -1,11 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { FormEventHandler, useState, useEffect } from 'react';
-import Card, { CardContent, CardHeader, CardTitle, CardFooter } from '@/Components/ui/Card';
+import Card, { CardContent } from '@/Components/ui/Card';
 import Button from '@/Components/ui/Button';
 import Input from '@/Components/ui/Input';
 import Select from '@/Components/ui/Select';
-import { ArrowLeft, Save } from 'lucide-react';
+import PageHeader from '@/Components/ui/PageHeader';
+import { ArrowLeft, Save, CreditCard, Calendar, Hash, Activity, Calculator, FileText, AlertCircle, CheckCircle2, DollarSign } from 'lucide-react';
 import { formatCurrency } from '@/utils/format';
 
 interface InvoiceSummary {
@@ -50,142 +51,166 @@ export default function Create({ invoices }: CreateProps) {
         post(route('payments.store'));
     };
 
-    const invoiceOptions = invoices.map(inv => ({
-        value: inv.id.toString(),
-        label: `${inv.number} - ${inv.customer_name} (${formatCurrency(inv.balance)} due)`
-    }));
-
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center gap-4">
-                    <Link href={route('payments.index')} className="text-gray-500 hover:text-gray-700">
-                        <ArrowLeft className="w-6 h-6" />
-                    </Link>
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800 font-heading">
-                        Record Payment
-                    </h2>
-                </div>
-            }
-        >
-            <Head title="Record Payment" />
+        <AuthenticatedLayout>
+            <Head title="Record Settlement" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <form onSubmit={submit}>
-                        <div className="grid grid-cols-12 gap-6">
-                            {/* Left Column - 70% */}
-                            <div className="col-span-12 lg:col-span-8 space-y-6">
-                                <Card>
-                                    <CardHeader className="pb-3 border-b border-gray-100">
-                                        <CardTitle className="text-base font-semibold">Payment Details</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-6 pt-6">
-                                       <Select
-                                            label="Select Invoice"
-                                            value={data.invoice_id}
-                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setData('invoice_id', e.target.value)}
-                                            error={errors.invoice_id}
-                                            className="rounded-md"
-                                            options={[
-                                                { value: '', label: 'Select an invoice to pay...' },
-                                                ...invoiceOptions
-                                            ]}
-                                            required
-                                        />
+            <PageHeader
+                title={
+                    <div className="flex items-center gap-3">
+                        <Link 
+                            href={route('payments.index')}
+                            className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary-600 hover:border-primary-100 hover:bg-primary-50/50 transition-all shadow-sm group"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </Link>
+                        <h2 className="text-xl font-bold text-slate-900 tracking-tight">Record Payment</h2>
+                    </div>
+                }
+                subtitle="Reconcile incoming funds against outstanding invoices"
+            />
 
+            <form onSubmit={submit} className="relative" noValidate>
+                <div className="grid grid-cols-12 gap-8">
+                    {/* Primary Recording Workspace */}
+                    <div className="col-span-12 lg:col-span-8 space-y-8">
+                        {/* Transaction Context Card */}
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 px-6 py-3">
+                                <FileText className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Target Document</span>
+                            </div>
+                            <CardContent className="p-6 space-y-6">
+                                <Select
+                                    label="Source Invoice"
+                                    value={data.invoice_id}
+                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setData('invoice_id', e.target.value)}
+                                    error={errors.invoice_id}
+                                    className="h-10 text-sm font-medium"
+                                    icon={<Hash className="w-5 h-5" />}
+                                    required
+                                >
+                                    <option value="">Select an outstanding invoice...</option>
+                                    {invoices.map(inv => (
+                                        <option key={inv.id} value={inv.id.toString()}>
+                                            {inv.number} — {inv.customer_name} ({formatCurrency(inv.balance)} due)
+                                        </option>
+                                    ))}
+                                </Select>
+
+                                {selectedInvoice && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice Original Total</span>
+                                            <p className="text-lg font-bold text-slate-900 font-mono tracking-tight">{formatCurrency(selectedInvoice.amount)}</p>
+                                        </div>
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Remaining Balance</span>
+                                            <p className="text-lg font-bold text-slate-900 font-mono tracking-tight">{formatCurrency(selectedInvoice.balance)}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Payment Configuration Card */}
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 px-6 py-3">
+                                <CreditCard className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Settlement Parameters</span>
+                            </div>
+                            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-6">
+                                    <Input
+                                        type="date"
+                                        label="Transaction Date"
+                                        value={data.date}
+                                        onChange={(e) => setData('date', e.target.value)}
+                                        error={errors.date}
+                                        className="h-10"
+                                        icon={<DollarSign className="w-4 h-4" />}
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    <Select
+                                        label="Payment Method"
+                                        value={data.payment_method}
+                                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setData('payment_method', e.target.value)}
+                                        error={errors.payment_method}
+                                        className="h-10"
+                                        icon={<CheckCircle2 className="w-4 h-4" />}
+                                    >
+                                        <option value="completed">Completed / Cleared</option>
+                                        <option value="pending">Pending Verification</option>
+                                    </Select>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Meta & Summary Sidebar */}
+                    <div className="col-span-12 lg:col-span-4 space-y-8">
+                        <Card className="border-none shadow-premium-soft overflow-hidden sticky top-8">
+                            <div className="h-1.5 w-full bg-slate-900"></div>
+                            <CardContent className="p-8 space-y-8">
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Financial Impact</h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reconciliation</span>
+                                            <span className="text-xl font-bold text-slate-900 font-mono tracking-tight">
+                                                +{formatCurrency(parseFloat(data.amount) || 0)}
+                                            </span>
+                                        </div>
                                         {selectedInvoice && (
-                                            <div className="bg-gray-50 p-4 rounded-lg flex justify-between items-center text-sm border border-gray-100">
-                                                <div>
-                                                    <p className="font-medium text-gray-700">Invoice Total: {formatCurrency(selectedInvoice.amount)}</p>
-                                                    <p className="text-gray-500">Outstanding: {formatCurrency(selectedInvoice.balance)}</p>
+                                            <div className="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Pro-forma Balance</span>
+                                                    <span className="text-xs font-black text-emerald-700 font-mono italic">
+                                                        {formatCurrency(Math.max(0, selectedInvoice.balance - (parseFloat(data.amount) || 0)))}
+                                                    </span>
                                                 </div>
                                             </div>
                                         )}
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <Input
-                                                type="date"
-                                                label="Payment Date"
-                                                value={data.date}
-                                                onChange={(e) => setData('date', e.target.value)}
-                                                error={errors.date}
-                                                className="rounded-md"
-                                                required
-                                            />
-                                            <Input
-                                                type="number"
-                                                label="Amount"
-                                                value={data.amount}
-                                                onChange={(e) => setData('amount', e.target.value)}
-                                                error={errors.amount}
-                                                step="0.01"
-                                                className="rounded-md"
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <Select
-                                                label="Payment Method"
-                                                value={data.payment_method}
-                                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setData('payment_method', e.target.value)}
-                                                error={errors.payment_method}
-                                                className="rounded-md"
-                                                options={[
-                                                    { value: 'bank_transfer', label: 'Bank Transfer' },
-                                                    { value: 'credit_card', label: 'Credit Card' },
-                                                    { value: 'check', label: 'Check' },
-                                                    { value: 'cash', label: 'Cash' },
-                                                    { value: 'other', label: 'Other' },
-                                                ]}
-                                            />
-                                            <Select
-                                                label="Status"
-                                                value={data.status}
-                                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setData('status', e.target.value as 'completed' | 'pending')}
-                                                error={errors.status}
-                                                className="rounded-md"
-                                                options={[
-                                                    { value: 'completed', label: 'Completed' },
-                                                    { value: 'pending', label: 'Pending' }
-                                                ]}
-                                            />
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-
-                            {/* Right Column - 30% - Sticky Actions */}
-                            <div className="col-span-12 lg:col-span-4 relative">
-                                <div className="lg:sticky lg:top-6 space-y-6">
-                                    <Card className="border-t-4 border-t-indigo-500">
-                                        <CardHeader className="pb-3 border-b border-gray-100">
-                                            <CardTitle className="text-base font-semibold">Actions</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4 pt-6">
-                                            <Button
-                                                type="submit"
-                                                variant="primary"
-                                                loading={processing}
-                                                className="w-full h-12 text-base font-bold bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200"
-                                                icon={<Save className="w-5 h-5" />}
-                                            >
-                                                Record Payment
-                                            </Button>
-                                             <Link href={route('payments.index')} className="block">
-                                                <Button variant="secondary" type="button" className="w-full">
-                                                    Cancel
-                                                </Button>
-                                            </Link>
-                                        </CardContent>
-                                    </Card>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </form>
+
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2 mb-1">
+                                         <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
+                                         <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Administrative Prompt</h3>
+                                    </div>
+                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-[11px] text-slate-500 font-bold leading-relaxed">
+                                        Recording this payment will automatically update the invoice status if the balance reaches zero. Ensure all transaction IDs are cross-referenced for audit compliance.
+                                    </div>
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    loading={processing}
+                                    className="w-full h-11 text-xs font-bold uppercase tracking-widest bg-slate-900 hover:bg-slate-800"
+                                    icon={<Save className="w-4 h-4" />}
+                                >
+                                    Record Payment
+                                </Button>
+
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                        <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Secured Action</h3>
+                                    </div>
+                                    <p className="text-[9px] text-slate-400 font-bold leading-relaxed px-1">
+                                        This action is permanent and will be logged in the global audit trail for financial reconciliation purposes.
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-            </div>
+            </form>
         </AuthenticatedLayout>
     );
 }

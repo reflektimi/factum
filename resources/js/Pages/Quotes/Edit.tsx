@@ -1,13 +1,14 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
-import Card, { CardContent, CardHeader, CardTitle, CardFooter } from '@/Components/ui/Card';
+import Card, { CardContent } from '@/Components/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
 import Input from '@/Components/ui/Input';
 import Select from '@/Components/ui/Select';
 import Button from '@/Components/ui/Button';
-import { Save, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import PageHeader from '@/Components/ui/PageHeader';
+import { Save, Plus, Trash2, ArrowLeft, Calculator, FileText, UserPlus, Calendar, Activity, Hash, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { FormEventHandler } from 'react';
 import { Account, Quote } from '@/types/models';
-import { FormEventHandler, useEffect } from 'react';
 import { formatCurrency } from '@/utils/format';
 
 interface EditQuoteProps {
@@ -33,20 +34,6 @@ export default function Edit({ quote, customers }: EditQuoteProps) {
         status: quote.status,
         notes: quote.notes || ''
     });
-
-    useEffect(() => {
-        const newItems = data.items.map(item => ({
-            ...item,
-            total: item.quantity * item.price
-        }));
-        
-        // Simpler check logic
-        const total = newItems.reduce((sum, item) => sum + item.total, 0);
-        
-        if (total !== data.total_amount) {
-            setData('total_amount', total);
-        }
-    }, [data.items]);
 
     const updateItem = (index: number, field: keyof QuoteItem, value: any) => {
         const newItems = [...data.items];
@@ -91,54 +78,62 @@ export default function Edit({ quote, customers }: EditQuoteProps) {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href={route('quotes.index')} className="text-gray-500 hover:text-gray-700">
-                            <ArrowLeft className="w-6 h-6" />
-                        </Link>
-                        <h2 className="text-xl font-semibold leading-tight text-gray-800 font-heading">
-                            Edit Quote {quote.number}
-                        </h2>
-                    </div>
-                </div>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title={`Edit Quote ${quote.number}`} />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-12 gap-6">
-                            {/* Left Column - 70% */}
-                            <div className="col-span-12 lg:col-span-8 space-y-6">
-                                {/* Quote Details */}
-                                <Card>
-                                    <CardHeader className="pb-3 border-b border-gray-100">
-                                        <CardTitle className="text-base font-semibold">Quote Details</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="grid gap-6 sm:grid-cols-2 pt-6">
-                                        <div className="sm:col-span-2">
-                                            <Select
-                                                label="Customer"
-                                                value={data.customer_id}
-                                                onChange={(e) => setData('customer_id', e.target.value)}
-                                                error={errors.customer_id}
-                                                className="rounded-md"
-                                                options={[
-                                                    { label: 'Select a customer', value: '' },
-                                                    ...customers.map(c => ({ label: c.name, value: c.id.toString() }))
-                                                ]}
-                                            />
-                                        </div>
+            <PageHeader
+                title={
+                    <div className="flex items-center gap-3">
+                        <Link 
+                            href={route('quotes.index')}
+                            className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary-600 hover:border-primary-100 transition-all shadow-sm group"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </Link>
+                        <div className="flex items-center gap-3">
+                            <span>Edit Quote</span>
+                            <span className="text-slate-400 font-mono text-lg font-medium">#{quote.number}</span>
+                        </div>
+                    </div>
+                }
+                subtitle="Modify document details and pricing for this proposal"
+            />
+
+            <form onSubmit={handleSubmit} className="relative" noValidate>
+                <div className="grid grid-cols-12 gap-8">
+                    {/* Primary Editing Workspace */}
+                    <div className="col-span-12 lg:col-span-8 space-y-8">
+                        {/* Transaction Context Card */}
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 px-6 py-3">
+                                <FileText className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Document Context</span>
+                            </div>
+                            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-6">
+                                    <Select
+                                        label="Customer Account"
+                                        value={data.customer_id}
+                                        onChange={(e) => setData('customer_id', e.target.value)}
+                                        error={errors.customer_id}
+                                        className="h-10"
+                                        icon={<UserPlus className="w-4 h-4" />}
+                                    >
+                                        <option value="">Select an account...</option>
+                                        {customers.map(c => (
+                                            <option key={c.id} value={c.id.toString()}>{c.name}</option>
+                                        ))}
+                                    </Select>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
                                         <Input
                                             label="Quote Date"
                                             type="date"
                                             value={data.date}
                                             onChange={(e) => setData('date', e.target.value)}
                                             error={errors.date}
-                                            className="rounded-md"
+                                            className="h-10"
+                                            icon={<Calendar className="w-4 h-4" />}
                                         />
                                         <Input
                                             label="Valid Until"
@@ -146,137 +141,185 @@ export default function Edit({ quote, customers }: EditQuoteProps) {
                                             value={data.expiry_date}
                                             onChange={(e) => setData('expiry_date', e.target.value)}
                                             error={errors.expiry_date}
-                                            className="rounded-md"
+                                            className="h-10"
+                                            icon={<Clock className="w-4 h-4" />}
                                         />
-                                         <Select
-                                            label="Status"
-                                            value={data.status}
-                                            onChange={(e) => setData('status', e.target.value as any)}
-                                            error={errors.status}
-                                            className="rounded-md"
-                                            options={[
-                                                { label: 'Draft', value: 'draft' },
-                                                { label: 'Sent', value: 'sent' },
-                                                { label: 'Accepted', value: 'accepted' },
-                                                { label: 'Rejected', value: 'rejected' },
-                                                { label: 'Converted', value: 'converted' }
-                                            ]}
-                                        />
-                                    </CardContent>
-                                </Card>
-
-                                {/* Items */}
-                                <Card className="overflow-hidden">
-                                     <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100 bg-gray-50/50">
-                                        <CardTitle className="text-base font-semibold">Items</CardTitle>
-                                        <Button type="button" variant="secondary" size="sm" onClick={addItem} icon={<Plus className="w-4 h-4"/>}>
-                                            Add Item
-                                        </Button>
-                                    </CardHeader>
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                                                    <TableHead className="w-[45%] font-bold text-gray-900">Description</TableHead>
-                                                    <TableHead className="w-[15%] font-bold text-gray-900 text-right">Quantity</TableHead>
-                                                    <TableHead className="w-[20%] font-bold text-gray-900 text-right">Price</TableHead>
-                                                    <TableHead className="w-[15%] font-bold text-gray-900 text-right">Total</TableHead>
-                                                    <TableHead className="w-[5%]"></TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {data.items.map((item, index) => (
-                                                    <TableRow key={index} className="hover:bg-gray-50/30">
-                                                        <TableCell className="align-top">
-                                                            <Input
-                                                                placeholder="Description"
-                                                                value={item.description}
-                                                                onChange={(e) => updateItem(index, 'description', e.target.value)}
-                                                                aria-label="Description"
-                                                                className="rounded-md border-gray-300 focus:border-indigo-500"
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell className="align-top">
-                                                            <Input
-                                                                type="number"
-                                                                min="1"
-                                                                value={item.quantity}
-                                                                onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
-                                                                aria-label="Quantity"
-                                                                className="text-right rounded-md border-gray-300 focus:border-indigo-500"
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell className="align-top">
-                                                            <Input
-                                                                type="number"
-                                                                min="0"
-                                                                step="0.01"
-                                                                value={item.price}
-                                                                onChange={(e) => updateItem(index, 'price', parseFloat(e.target.value))}
-                                                                aria-label="Price"
-                                                                className="text-right rounded-md border-gray-300 focus:border-indigo-500"
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-medium text-gray-900 pt-5 align-top">
-                                                            {formatCurrency(item.total)}
-                                                        </TableCell>
-                                                        <TableCell className="text-right align-top pt-4">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeItem(index)}
-                                                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
                                     </div>
-                                    {errors.items && (
-                                        <div className="p-4 bg-red-50 text-red-600 text-sm border-t border-red-100">
-                                            {errors.items}
-                                        </div>
-                                    )}
-                                </Card>
-                            </div>
-
-                            {/* Right Column - 30% - Sticky Summary */}
-                            <div className="col-span-12 lg:col-span-4 relative">
-                                <div className="lg:sticky lg:top-6 space-y-6">
-                                    <Card className="border-t-4 border-t-indigo-500">
-                                        <CardHeader className="pb-3 border-b border-gray-100">
-                                            <CardTitle className="text-base font-semibold">Summary</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4 pt-6">
-                                            <div className="flex justify-between items-center text-sm text-gray-500">
-                                                <span>Items</span>
-                                                <span>{data.items.length}</span>
-                                            </div>
-                                            <div className="pt-4 border-t border-gray-100 flex justify-between items-end">
-                                                <span className="text-base font-bold text-gray-900">Total Amount</span>
-                                                <span className="text-2xl font-bold text-indigo-600">{formatCurrency(data.total_amount)}</span>
-                                            </div>
-                                        </CardContent>
-                                        <CardFooter className="pt-4 pb-6 px-6 border-0">
-                                            <Button
-                                                type="submit"
-                                                variant="primary"
-                                                loading={processing}
-                                                className="w-full h-12 text-base font-bold bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200"
-                                                icon={<Save className="w-5 h-5" />}
-                                            >
-                                                Save Changes
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
                                 </div>
+                                
+                                <div className="space-y-6">
+                                    <Select
+                                        label="Initial Status"
+                                        value={data.status}
+                                        onChange={(e) => setData('status', e.target.value as any)}
+                                        error={errors.status}
+                                        className="h-10"
+                                        icon={<Activity className="w-4 h-4" />}
+                                    >
+                                        <option value="draft">Draft</option>
+                                        <option value="sent">Dispatched</option>
+                                        <option value="accepted">Accepted</option>
+                                        <option value="rejected">Rejected</option>
+                                        <option value="converted">Converted</option>
+                                    </Select>
+
+                                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3 mt-1">
+                                        <Activity className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                                            Status changes are tracked in the document lifecycle. Accepting a quote allows for immediate invoice conversion.
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Line Items Workspace */}
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center justify-between px-6 py-3">
+                                <div className="flex items-center gap-2">
+                                    <Calculator className="w-4 h-4 text-slate-400" />
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Proposal Items</span>
+                                </div>
+                                <Button 
+                                    type="button" 
+                                    variant="soft" 
+                                    size="sm" 
+                                    onClick={addItem} 
+                                    icon={<Plus className="w-3.5 h-3.5" />}
+                                    className="h-8 text-[10px] font-bold uppercase tracking-widest"
+                                >
+                                    Add Line
+                                </Button>
                             </div>
-                        </div>
-                    </form>
+                            
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader className="bg-slate-50/50">
+                                        <TableRow className="hover:bg-transparent border-slate-100">
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 pl-6">Description</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest text-right">Qty</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest text-right">Rate</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest text-right pr-6">Amount</TableHead>
+                                            <TableHead className="w-[50px]"></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {data.items.map((item, index) => (
+                                            <TableRow key={index} className="group hover:bg-slate-50/50 transition-colors border-slate-50">
+                                                <TableCell className="py-2 pl-6">
+                                                    <input
+                                                        type="text"
+                                                        value={item.description}
+                                                        onChange={(e) => updateItem(index, 'description', e.target.value)}
+                                                        placeholder="Service or product description..."
+                                                        className="w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-slate-700 placeholder:text-slate-300 p-0"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="py-2 text-right">
+                                                    <input
+                                                        type="number"
+                                                        value={item.quantity}
+                                                        onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
+                                                        className="w-20 bg-transparent border-none focus:ring-0 text-right text-sm font-mono text-slate-600 p-0"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="py-2 text-right">
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={item.price}
+                                                        onChange={(e) => updateItem(index, 'price', parseFloat(e.target.value))}
+                                                        className="w-32 bg-transparent border-none focus:ring-0 text-right text-sm font-mono text-slate-600 p-0"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="py-2 text-right pr-6 font-bold text-slate-900 font-mono text-sm tracking-tight">
+                                                    {formatCurrency(item.total)}
+                                                </TableCell>
+                                                <TableCell className="py-2">
+                                                    {data.items.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeItem(index)}
+                                                            className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                            
+                            {errors.items && (
+                                <div className="p-4 flex items-center gap-3 bg-red-50 border-t border-red-100 text-red-600 text-xs font-bold animate-in slide-in-from-bottom-2">
+                                    <Activity className="w-4 h-4" />
+                                    {errors.items}
+                                </div>
+                            )}
+                        </Card>
+                    </div>
+
+                    {/* Meta & Summary Sidebar */}
+                    <div className="col-span-12 lg:col-span-4 space-y-8">
+                        <Card className="border-none shadow-premium-soft overflow-hidden sticky top-8">
+                            <div className="h-1.5 w-full bg-slate-900"></div>
+                            <CardContent className="p-6 space-y-8">
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Quote Summary</h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Value</span>
+                                            <span className="text-2xl font-bold text-slate-900 font-mono tracking-tighter">
+                                                {formatCurrency(data.total_amount)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2 mb-1">
+                                         <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
+                                         <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Client Message</h3>
+                                    </div>
+                                    <textarea
+                                        value={data.notes}
+                                        onChange={(e) => setData('notes', e.target.value)}
+                                        placeholder="Add terms, conditions, or a friendly note for the recipient..."
+                                        className="w-full min-h-[120px] rounded-2xl border-slate-200 bg-slate-50 focus:border-slate-300 focus:ring-4 focus:ring-slate-50 transition-all text-sm placeholder:text-slate-300 font-medium"
+                                    />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    loading={processing}
+                                    className="w-full h-11 text-xs font-bold uppercase tracking-widest bg-slate-900 hover:bg-slate-800"
+                                    icon={<Save className="w-4 h-4" />}
+                                >
+                                    Save Changes
+                                </Button>
+
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                        <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Audit Trail</h3>
+                                    </div>
+                                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                                            Last modified by Administrative System
+                                        </p>
+                                        <p className="text-[9px] text-slate-400 font-mono italic">
+                                            ID: {quote.id.toString().padStart(6, '0')}
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-            </div>
+            </form>
         </AuthenticatedLayout>
     );
 }
