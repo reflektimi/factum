@@ -31,8 +31,12 @@ WORKDIR /var/www
 # Copy application files
 COPY . .
 
+
 # Install PHP dependencies (production)
 RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Install Node dependencies (including devDependencies) for build
+RUN npm ci
 
 
 
