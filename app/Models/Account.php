@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\BelongsToUser;
+use App\Traits\LogsActivity;
 
 class Account extends Model
 {
-    use BelongsToUser;
+    use BelongsToUser, LogsActivity, HasFactory;
 
     protected $fillable = [
         'user_id',

@@ -19,12 +19,15 @@ return new class extends Migration
             'quotes',
             'recurring_invoices',
             'financial_insights',
+            'credit_notes',
         ];
 
         foreach ($tables as $table) {
-            Schema::table($table, function (Blueprint $table) {
-                $table->foreignId('user_id')->nullable()->after('id')->constrained()->cascadeOnDelete();
-            });
+            if (!Schema::hasColumn($table, 'user_id')) {
+                Schema::table($table, function (Blueprint $table) {
+                    $table->foreignId('user_id')->nullable()->after('id')->constrained()->cascadeOnDelete();
+                });
+            }
         }
     }
 

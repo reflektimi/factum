@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Traits\BelongsToUser;
 use App\Traits\LogsActivity;
@@ -12,7 +13,7 @@ use App\Models\Invoice;
 
 class CreditNote extends Model
 {
-    use BelongsToUser, LogsActivity;
+    use BelongsToUser, LogsActivity, HasFactory;
 
     protected $fillable = [
         'user_id',

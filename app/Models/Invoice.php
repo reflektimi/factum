@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\BelongsToUser;
 use App\Traits\LogsActivity;
 use App\Models\DocumentLineItem;
@@ -11,7 +12,7 @@ use App\Models\Account;
 
 class Invoice extends Model
 {
-    use BelongsToUser, LogsActivity;
+    use BelongsToUser, LogsActivity, HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -35,6 +36,14 @@ class Invoice extends Model
     public function customer()
     {
         return $this->belongsTo(Account::class, 'customer_id');
+    }
+
+    /**
+     * Alias for customer(), required for some legacy calls or factory logic expecting 'account'
+     */
+    public function account()
+    {
+        return $this->customer();
     }
 
     /**
