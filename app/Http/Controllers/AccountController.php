@@ -13,6 +13,8 @@ class AccountController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Account::class);
+
         $query = Account::query();
         
         // Search
@@ -22,7 +24,7 @@ class AccountController extends Controller
         }
         
         // Filter by type
-        if ($request->has('type')) {
+        if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
         
@@ -39,6 +41,8 @@ class AccountController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Account::class);
+
         return Inertia::render('Accounts/Create');
     }
 
@@ -47,6 +51,8 @@ class AccountController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Account::class);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:customer,supplier',
@@ -57,9 +63,10 @@ class AccountController extends Controller
             'balance' => 'nullable|numeric',
         ]);
         
-        Account::create($validated);
+        $account = Account::create($validated);
         
-        return back()->with('success', 'Account created successfully.');
+        return redirect()->route('accounts.show', $account->id)
+            ->with('success', 'Account created successfully.');
     }
 
     /**
@@ -67,6 +74,8 @@ class AccountController extends Controller
      */
     public function show(Account $account)
     {
+        $this->authorize('view', $account);
+
         return Inertia::render('Accounts/Show', [
             'account' => $account->load(['invoices', 'payments']),
         ]);
@@ -77,6 +86,8 @@ class AccountController extends Controller
      */
     public function edit(Account $account)
     {
+        $this->authorize('update', $account);
+
         return Inertia::render('Accounts/Edit', [
             'account' => $account,
         ]);
@@ -87,6 +98,8 @@ class AccountController extends Controller
      */
     public function update(Request $request, Account $account)
     {
+        $this->authorize('update', $account);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:customer,supplier',
@@ -104,6 +117,8 @@ class AccountController extends Controller
      */
     public function destroy(Account $account)
     {
+        $this->authorize('delete', $account);
+
         $account->delete();
         
         return redirect()->route('accounts.index')

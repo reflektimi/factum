@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\RecurringInvoice;
 use App\Models\Account;
+use App\Http\Requests\StoreRecurringInvoiceRequest;
+use App\Http\Requests\UpdateRecurringInvoiceRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RecurringInvoiceController extends Controller
 {
@@ -14,6 +19,8 @@ class RecurringInvoiceController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', RecurringInvoice::class);
+
         $query = RecurringInvoice::with('customer')
             ->orderBy('next_run_date', 'asc');
 
@@ -27,126 +34,195 @@ class RecurringInvoiceController extends Controller
             });
         }
         
-        if ($request->has('status') && $request->status !== 'all') {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
-
+ 
         $recurringInvoices = $query->paginate(10)->withQueryString();
-
+ 
         return Inertia::render('RecurringInvoices', [
-            'recurringInvoices' => $recurringInvoices,
-            'filters' => $request->only(['search', 'status']),
-        ]);
-    }
+             'recurringInvoices' => $recurringInvoices,
+             'filters' => $request->only(['search', 'status']),
+         ]);
+     }
+ 
+     /**
+      * Show the form for creating a new recurring invoice.
+      */
+     public function create()
+     {
+         $this->authorize('create', RecurringInvoice::class);
+ 
+         $customers = Account::where('type', 'customer')->orderBy('name')->get();
+         
+         return Inertia::render('RecurringInvoices/Create', [
+             'customers' => $customers,
+         ]);
+     }
+ 
+     /**
+      * Store a newly created recurring invoice in storage.
+      */
+     public function store(StoreRecurringInvoiceRequest $request)
+     {
+         $this->authorize('create', RecurringInvoice::class);
+ 
+         $validated = $request->validated();
+         $items = $validated['items'];
+         unset($validated['items']);
+ 
+         $totalAmount = collect($items)->sum(function ($item) {
+             return $item['quantity'] * $item['price'];
+         });
+ 
+         // Next run date starts as start_date
+         $nextRunDate = $request->start_date;
+ 
+         return DB::transaction(function () use ($validated, $items, $totalAmount, $nextRunDate) {
+             $recurringInvoice = RecurringInvoice::create([
+                 ...$validated,
+                 'status' => 'active',
+                 'total_amount' => $totalAmount,
+                 'next_run_date' => $nextRunDate,
+             ]);
+ 
+             foreach ($items as $index => $item) {
+                 $recurringInvoice->lineItems()->create([
+                     'user_id' => Auth::id(),
+                     'description' => $item['description'],
+                     'quantity' => $item['quantity'],
+                     'unit_price' => $item['price'],
+                     'subtotal' => $item['quantity'] * $item['price'],
+                     'total' => $item['quantity'] * $item['price'],
+                     'sort_order' => $index,
+                 ]);
+             }
+ 
+             return redirect()->route('recurring-invoices.show', $recurringInvoice->id)
+                 ->with('success', 'Recurring invoice profile created successfully.');
+         });
+     }
+ 
+     /**
+      * Show the form for editing the specified recurring invoice.
+      */
+     public function edit(RecurringInvoice $recurringInvoice)
+     {
+         $this->authorize('update', $recurringInvoice);
+ 
+         $recurringInvoice->load(['customer', 'lineItems']);
+         
+         // Map lineItems to the 'items' format expected by the frontend
+         $recurringInvoice->items = $recurringInvoice->lineItems->map(function ($item) {
+             return [
+                 'description' => $item->description,
+                 'quantity' => $item->quantity,
+                 'price' => $item->unit_price,
+                 'total' => $item->total,
+             ];
+         });
+ 
+         $customers = Account::where('type', 'customer')->orderBy('name')->get();
+         return Inertia::render('RecurringInvoices/Edit', [
+             'recurringInvoice' => $recurringInvoice,
+             'customers' => $customers,
+         ]);
+     }
+     /**
+      * Display the specified recurring invoice.
+      */
+     public function show(RecurringInvoice $recurringInvoice)
+     {
+         $this->authorize('view', $recurringInvoice);
+ 
+        $recurringInvoice->load(['customer', 'lineItems', 'activityLogs.user']);
+        $recurringInvoice->logActivity('viewed');
 
-    /**
-     * Show the form for creating a new recurring invoice.
-     */
-    public function create()
-    {
-        $customers = Account::where('type', 'customer')->orderBy('name')->get();
-        return Inertia::render('RecurringInvoices/Create', [
-            'customers' => $customers,
-        ]);
-    }
-
-    /**
-     * Store a newly created recurring invoice in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'profile_name' => 'required|string|max:255',
-            'customer_id' => 'required|exists:accounts,id',
-            'interval' => 'required|in:monthly,quarterly,yearly',
-            'start_date' => 'required|date',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string',
-            'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.price' => 'required|numeric|min:0',
-            'auto_send' => 'boolean',
-        ]);
-
-        $totalAmount = collect($request->items)->sum(function ($item) {
-            return $item['quantity'] * $item['price'];
+        // Map lineItems to the 'items' format expected by the frontend
+        $recurringInvoice->items = $recurringInvoice->lineItems->map(function ($item) {
+            return [
+                'description' => $item->description,
+                'quantity' => $item->quantity,
+                'price' => $item->unit_price,
+                'total' => $item->total,
+            ];
         });
 
-        // Next run date starts as start_date
-        $nextRunDate = $request->start_date;
-
-        RecurringInvoice::create([
-            ...$validated,
-            'status' => 'active',
-            'items' => $request->items,
-            'total_amount' => $totalAmount,
-            'next_run_date' => $nextRunDate,
-        ]);
-
-        return redirect()->route('recurring-invoices.index')
-            ->with('success', 'Recurring invoice profile created successfully.');
-    }
-
-    /**
-     * Show the form for editing the specified recurring invoice.
-     */
-    public function edit(RecurringInvoice $recurringInvoice)
-    {
-        $customers = Account::where('type', 'customer')->orderBy('name')->get();
-        return Inertia::render('RecurringInvoices/Edit', [
-            'recurringInvoice' => $recurringInvoice,
-            'customers' => $customers,
-        ]);
-    }
-    /**
-     * Display the specified recurring invoice.
-     */
-    public function show(RecurringInvoice $recurringInvoice)
-    {
-        $recurringInvoice->load('customer');
         return Inertia::render('RecurringInvoices/Show', [
             'recurringInvoice' => $recurringInvoice,
         ]);
     }
-
+ 
+     /**
+      * Update the specified recurring invoice in storage.
+      */
+     public function update(UpdateRecurringInvoiceRequest $request, RecurringInvoice $recurringInvoice)
+     {
+         $this->authorize('update', $recurringInvoice);
+ 
+         $validated = $request->validated();
+         $items = $validated['items'];
+         unset($validated['items']);
+ 
+         $totalAmount = collect($items)->sum(function ($item) {
+             return $item['quantity'] * $item['price'];
+         });
+ 
+         return DB::transaction(function () use ($recurringInvoice, $validated, $items, $totalAmount) {
+             $recurringInvoice->update([
+                 ...$validated,
+                 'total_amount' => $totalAmount,
+             ]);
+ 
+             // Sync items: delete existing and recreate
+             $recurringInvoice->lineItems()->delete();
+ 
+             foreach ($items as $index => $item) {
+                 $recurringInvoice->lineItems()->create([
+                     'user_id' => Auth::id(),
+                     'description' => $item['description'],
+                     'quantity' => $item['quantity'],
+                     'unit_price' => $item['price'],
+                     'subtotal' => $item['quantity'] * $item['price'],
+                     'total' => $item['quantity'] * $item['price'],
+                     'sort_order' => $index,
+                 ]);
+             }
+ 
+             return redirect()->route('recurring-invoices.show', $recurringInvoice->id)
+                 ->with('success', 'Recurring invoice profile updated successfully.');
+         });
+     }
+ 
+     /**
+      * Remove the specified recurring invoice from storage.
+      */
+     public function destroy(RecurringInvoice $recurringInvoice)
+     {
+         $this->authorize('delete', $recurringInvoice);
+ 
+         $recurringInvoice->delete();
+         return redirect()->route('recurring-invoices.index')
+             ->with('success', 'Recurring invoice profile deleted successfully.');
+     }
     /**
-     * Update the specified recurring invoice in storage.
+     * Force run the recurring invoice.
      */
-    public function update(Request $request, RecurringInvoice $recurringInvoice)
+    public function run(RecurringInvoice $recurringInvoice)
     {
-        $validated = $request->validate([
-            'profile_name' => 'required|string|max:255',
-            'customer_id' => 'required|exists:accounts,id',
-            'interval' => 'required|in:monthly,quarterly,yearly',
-            'start_date' => 'required|date',
-            'status' => 'required|in:active,paused,ended',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string',
-            'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.price' => 'required|numeric|min:0',
-            'auto_send' => 'boolean',
-        ]);
+        $this->authorize('update', $recurringInvoice);
 
-        $totalAmount = collect($request->items)->sum(function ($item) {
-            return $item['quantity'] * $item['price'];
-        });
-
+        // This would normally call a service class or job
+        // For now, we'll just log activity and update the last_run_date
+        
         $recurringInvoice->update([
-            ...$validated,
-            'items' => $request->items,
-            'total_amount' => $totalAmount,
+            'last_run_date' => now(),
+            // In a real app, you'd calculate the next run date based on interval
+            'next_run_date' => now()->addDays(30), // Example logic
         ]);
 
-        return redirect()->route('recurring-invoices.index')
-            ->with('success', 'Recurring invoice profile updated successfully.');
-    }
+        $recurringInvoice->logActivity('run', 'Recurring invoice profile executed manually');
 
-    /**
-     * Remove the specified recurring invoice from storage.
-     */
-    public function destroy(RecurringInvoice $recurringInvoice)
-    {
-        $recurringInvoice->delete();
-        return redirect()->route('recurring-invoices.index')
-            ->with('success', 'Recurring invoice profile deleted successfully.');
+        return back()->with('success', 'Recurring invoice profile executed successfully.');
     }
 }

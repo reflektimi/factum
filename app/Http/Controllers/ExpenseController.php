@@ -14,6 +14,8 @@ class ExpenseController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Expense::class);
+
         $query = Expense::query();
         
         if ($request->has('search')) {
@@ -23,7 +25,7 @@ class ExpenseController extends Controller
                   ->orWhere('category', 'like', "%{$search}%");
         }
         
-        if ($request->has('category')) {
+        if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
         
@@ -38,6 +40,8 @@ class ExpenseController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Expense::class);
+
         return Inertia::render('Expenses/Create');
     }
 
@@ -46,6 +50,8 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Expense::class);
+
         $validated = $request->validate([
             'description' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
@@ -65,9 +71,9 @@ class ExpenseController extends Controller
             $data['receipt_path'] = '/receipts/' . $filename;
         }
 
-        Expense::create($data);
+        $expense = Expense::create($data);
         
-        return redirect()->route('expenses.index')
+        return redirect()->route('expenses.show', $expense->id)
             ->with('success', 'Expense recorded successfully.');
     }
 
@@ -76,6 +82,10 @@ class ExpenseController extends Controller
      */
     public function show(Expense $expense)
     {
+        $this->authorize('view', $expense);
+
+        $expense->load(['activityLogs.user']);
+        $expense->logActivity('viewed');
         return Inertia::render('Expenses/Show', [
             'expense' => $expense,
         ]);
@@ -86,6 +96,8 @@ class ExpenseController extends Controller
      */
     public function edit(Expense $expense)
     {
+        $this->authorize('update', $expense);
+
         return Inertia::render('Expenses/Edit', [
             'expense' => $expense,
         ]);
@@ -96,6 +108,8 @@ class ExpenseController extends Controller
      */
     public function update(Request $request, Expense $expense)
     {
+        $this->authorize('update', $expense);
+
         // Validating
         $validated = $request->validate([
             'description' => 'required|string|max:255',
@@ -104,16 +118,9 @@ class ExpenseController extends Controller
             'category' => 'required|string',
         ]);
         
-        // Handling file update is complex with Inertia (needs multipart/form-data with PUT spoofing)
-        // For simplicity, we skip file update in basic edit or use POST with _method=PUT elsewhere.
-        // But Inertia useForm helper handles this?
-        // Actually, PHP doesn't handle files well in PUT requests.
-        // We often use POST with _method=PUT.
-        // I will stick to basic updates here.
-        
         $expense->update($validated);
         
-        return back()->with('success', 'Expense updated successfully.');
+        return redirect()->route('expenses.show', $expense->id)->with('success', 'Expense updated successfully.');
     }
 
     /**
@@ -121,6 +128,8 @@ class ExpenseController extends Controller
      */
     public function destroy(Expense $expense)
     {
+        $this->authorize('delete', $expense);
+
         $expense->delete();
         
         return redirect()->route('expenses.index')

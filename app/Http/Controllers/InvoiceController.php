@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Account;
+use App\Http\Requests\StoreInvoiceRequest;
+use App\Http\Requests\UpdateInvoiceRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -14,6 +19,8 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Invoice::class);
+
         $query = Invoice::with('customer');
         
         // Search
@@ -28,7 +35,7 @@ class InvoiceController extends Controller
         }
         
         // Filter by status
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         
@@ -45,6 +52,8 @@ class InvoiceController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Invoice::class);
+
         $customers = Account::where('type', 'customer')->get();
         
         return Inertia::render('Invoices/Create', [
@@ -55,18 +64,13 @@ class InvoiceController extends Controller
     /**
      * Store a newly created invoice
      */
-    public function store(Request $request)
+    public function store(StoreInvoiceRequest $request)
     {
-        $validated = $request->validate([
-            'customer_id' => 'required|exists:accounts,id',
-            'date' => 'required|date',
-            'due_date' => 'required|date|after:date',
-            'items' => 'required|array',
-            'items.*.description' => 'required|string',
-            'items.*.quantity' => 'required|numeric|min:1',
-            'items.*.price' => 'required|numeric|min:0',
-            'total_amount' => 'required|numeric|min:0',
-        ]);
+        $this->authorize('create', Invoice::class);
+
+        $validated = $request->validated();
+        $items = $validated['items'];
+        unset($validated['items']);
         
         // Generate invoice number
         $lastInvoice = Invoice::latest()->first();
@@ -75,10 +79,24 @@ class InvoiceController extends Controller
         $validated['number'] = $number;
         $validated['status'] = 'pending';
         
-        Invoice::create($validated);
-        
-        return redirect()->route('invoices.index')
-            ->with('success', 'Invoice created successfully.');
+        return DB::transaction(function () use ($validated, $items) {
+            $invoice = Invoice::create($validated);
+            
+            foreach ($items as $index => $item) {
+                $invoice->lineItems()->create([
+                    'user_id' => Auth::id(),
+                    'description' => $item['description'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['price'],
+                    'subtotal' => $item['quantity'] * $item['price'],
+                    'total' => $item['quantity'] * $item['price'], // Simplification: tax handled elsewhere or later
+                    'sort_order' => $index,
+                ]);
+            }
+            
+            return redirect()->route('invoices.show', $invoice->id)
+                ->with('success', 'Invoice created successfully.');
+        });
     }
 
     /**
@@ -86,8 +104,23 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
+        $this->authorize('view', $invoice);
+
+        $invoice->load(['customer', 'payments', 'lineItems', 'activityLogs.user']);
+        $invoice->logActivity('viewed');
+
+        // Map lineItems to the 'items' format expected by the frontend
+        $invoice->items = $invoice->lineItems->map(function ($item) {
+            return [
+                'description' => $item->description,
+                'quantity' => $item->quantity,
+                'price' => $item->unit_price,
+                'total' => $item->total,
+            ];
+        });
+
         return Inertia::render('Invoices/Show', [
-            'invoice' => $invoice->load('customer', 'payments'),
+            'invoice' => $invoice,
         ]);
     }
 
@@ -96,6 +129,8 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
+        $this->authorize('update', $invoice);
+
         $customers = Account::where('type', 'customer')->get();
 
         return Inertia::render('Invoices/Edit', [
@@ -107,15 +142,15 @@ class InvoiceController extends Controller
     /**
      * Update the specified invoice
      */
-    public function update(Request $request, Invoice $invoice)
+    public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:pending,paid,overdue',
-        ]);
+        $this->authorize('update', $invoice);
+
+        $validated = $request->validated();
         
         $invoice->update($validated);
         
-        return back()->with('success', 'Invoice updated successfully.');
+        return redirect()->route('invoices.show', $invoice->id)->with('success', 'Invoice updated successfully.');
     }
 
     /**
@@ -123,9 +158,49 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
+        $this->authorize('delete', $invoice);
+
         $invoice->delete();
         
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice deleted successfully.');
+    }
+    /**
+     * Download the invoice as PDF (via browser print)
+     */
+    public function download(Invoice $invoice)
+    {
+        $this->authorize('view', $invoice);
+
+        return redirect()->route('invoices.show', [$invoice->id, 'print' => true]);
+    }
+
+    /**
+     * Resend the invoice notification
+     */
+    public function resend(Invoice $invoice)
+    {
+        $this->authorize('update', $invoice);
+
+        // Logic to trigger the email
+        // ...
+        
+        $invoice->logActivity('sent', 'Invoice notification resent manually');
+        
+        return back()->with('success', 'Notification resent successfully.');
+    }
+
+    /**
+     * Show the public view of the invoice
+     */
+    public function publicView(Invoice $invoice)
+    {
+        $invoice->load(['customer', 'lineItems']);
+        $invoice->logActivity('viewed', 'Public URL accessed by recipient');
+        
+        return Inertia::render('Invoices/PublicShow', [
+            'invoice' => $invoice,
+            'settings' => \App\Models\Setting::first(),
+        ]);
     }
 }

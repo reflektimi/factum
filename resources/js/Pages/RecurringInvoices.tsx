@@ -1,16 +1,20 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import Card, { CardContent } from '@/Components/ui/Card';
-import Button from '@/Components/ui/Button';
-import StatusBadge from '@/Components/ui/StatusBadge';
 import Badge from '@/Components/ui/Badge';
+import Button from '@/Components/ui/Button';
+import PageHeader from '@/Components/ui/PageHeader';
+import Toolbar from '@/Components/ui/Toolbar';
 import Input from '@/Components/ui/Input';
+import Select from '@/Components/ui/Select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableActions } from '@/Components/ui/Table';
-import Dropdown from '@/Components/Dropdown';
-import { Plus, Search, Repeat, Calendar, MoreVertical, Edit2, Trash2, Filter } from 'lucide-react';
-import { PaginatedData,  RecurringInvoice } from '@/types/models';
+import { Plus, Search, RefreshCw, MoreVertical, Edit2, Trash2, ExternalLink, Calendar, Clock, History, Activity, Tag, ShieldCheck, Mail, User } from 'lucide-react';
+import { PaginatedData, RecurringInvoice } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import DeleteConfirmation from '@/Components/DeleteConfirmation';
+import Dropdown from '@/Components/Dropdown';
+import clsx from 'clsx';
 
 interface RecurringInvoicesProps {
     recurringInvoices: PaginatedData<RecurringInvoice>;
@@ -22,158 +26,222 @@ interface RecurringInvoicesProps {
 
 export default function RecurringInvoices({ recurringInvoices, filters }: RecurringInvoicesProps) {
     const [search, setSearch] = useState(filters.search || '');
-    const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (search !== (filters.search || '')) {
+                const params = { search, status: filters.status };
+                const cleanParams = Object.fromEntries(
+                    Object.entries(params).filter(([_, v]) => v)
+                );
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        router.get(route('recurring-invoices.index'), { search, status: statusFilter }, { preserveState: true });
+                router.get(
+                    route('recurring-invoices.index'),
+                    cleanParams,
+                    { preserveState: true, replace: true }
+                );
+            }
+        }, 300);
+        
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const getStatusVariant = (status: string) => {
+        switch (status) {
+            case 'active': return 'success';
+            case 'paused': return 'warning';
+            case 'ended': return 'danger';
+            default: return 'soft';
+        }
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-gray-900 font-heading">
-                            Recurring Invoices
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                            Automate your billing with recurring profiles.
-                        </p>
+        <AuthenticatedLayout>
+            <Head title="Automation Registry - Recurring Invoices" />
+
+            <PageHeader 
+                title="Recurring Invoices"
+                subtitle="Automated document generation for subscription-based models and scheduled billing"
+                actions={
+                    <Button 
+                        variant="primary" 
+                        icon={<Plus className="w-5 h-5" />} 
+                        onClick={() => router.visit(route('recurring-invoices.create'))}
+                    >
+                        Schedule Profile
+                    </Button>
+                }
+            />
+
+            <Toolbar className="mb-8 p-4">
+                <div className="flex flex-col md:flex-row gap-4 w-full items-center">
+                    <div className="relative flex-1 w-full">
+                        <Input
+                            placeholder="Identify automation profile by name..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            icon={<Search className="w-4 h-4" />}
+                        />
                     </div>
-                    <Link href={route('recurring-invoices.create')}>
-                        <Button variant="primary" icon={<Plus className="w-4 h-4" />}>
-                            New Recurring Profile
-                        </Button>
-                    </Link>
+                    <div className="w-full md:w-64">
+                        <Select
+                            value={filters.status || ''}
+                            onChange={(e) => {
+                                const params = { search, status: e.target.value };
+                                const cleanParams = Object.fromEntries(
+                                    Object.entries(params).filter(([_, v]) => v)
+                                );
+                                
+                                router.get(
+                                    route('recurring-invoices.index'),
+                                    cleanParams,
+                                    { preserveState: true, replace: true }
+                                );
+                            }}
+                            icon={<Activity className="w-4 h-4" />}
+                        >
+                            <option value="">Automation State</option>
+                            <option value="active">Active</option>
+                            <option value="paused">Paused</option>
+                            <option value="ended">Ended</option>
+                        </Select>
+                    </div>
                 </div>
-            }
-        >
-            <Head title="Recurring Invoices" />
+            </Toolbar>
 
-            {/* Filters */}
-            {/* Filters */}
-            <Card className="mb-6">
-                <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search profiles or customers..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                            />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <select
-                                className="rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 h-[42px]"
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                                <option value="all">All Statuses</option>
-                                <option value="active">Active</option>
-                                <option value="paused">Paused</option>
-                                <option value="ended">Ended</option>
-                            </select>
-                            <Button onClick={handleSearch} variant="secondary">
-                                Apply
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Recurring Invoices Table */}
-            <Card>
-                <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Profile Name</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Interval</TableHead>
-                        <TableHead>Next Run</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {recurringInvoices.data.length > 0 ? (
-                        recurringInvoices.data.map((invoice) => (
-                            <TableRow key={invoice.id}>
-                                <TableCell className="font-medium text-gray-900">
-                                    <div className="flex items-center gap-2">
-                                        <Repeat className="w-4 h-4 text-indigo-500" />
-                                        {invoice.profile_name}
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-gray-600">
-                                    {invoice.customer?.name}
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="default" className="capitalize bg-purple-50 text-purple-700 border-purple-200">
-                                        {invoice.interval}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-gray-600">
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                                        {invoice.next_run_date ? formatDate(invoice.next_run_date) : '-'}
-                                    </div>
-                                </TableCell>
-                                <TableCell className="font-medium text-gray-900">
-                                    {formatCurrency(invoice.total_amount)}
-                                </TableCell>
-                                <TableCell>
-                                    <StatusBadge status={invoice.status} />
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <TableActions>
-                                        <Dropdown>
-                                             <Dropdown.Trigger>
-                                                <button className="p-1 rounded-md hover:bg-slate-100 text-slate-500 transition-colors">
-                                                    <MoreVertical className="w-4 h-4" />
-                                                </button>
-                                            </Dropdown.Trigger>
-                                            <Dropdown.Content align="right" width="48">
-                                                <Dropdown.Link href={route('recurring-invoices.show', invoice.id)}>
-                                                    View Profile
-                                                </Dropdown.Link>
-                                                <Dropdown.Link href={route('recurring-invoices.edit', invoice.id)}>
-                                                    Edit Profile
-                                                </Dropdown.Link>
-                                                <div className="border-t border-gray-100"></div>
-                                                <Dropdown.Link 
-                                                    href={route('recurring-invoices.destroy', invoice.id)} 
-                                                    method="delete" 
-                                                    as="button"
-                                                    className="text-red-600 hover:bg-red-50"
+            <Card className="border-none shadow-premium-soft overflow-hidden">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="pl-6">Profile Name</TableHead>
+                            <TableHead>Interval</TableHead>
+                            <TableHead>Chronology</TableHead>
+                            <TableHead align="right">State</TableHead>
+                            <TableHead align="right" className="pr-6">Amount</TableHead>
+                            <TableHead align="right" className="pr-6">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {recurringInvoices.data.length > 0 ? (
+                            recurringInvoices.data.map((profile) => (
+                                <TableRow key={profile.id} className="group hover:bg-slate-50/50 transition-all border-slate-50">
+                                    <TableCell className="pl-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-primary-600 transition-colors">
+                                                <RefreshCw className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <Link 
+                                                    href={route('recurring-invoices.show', profile.id)}
+                                                    className="text-sm font-semibold text-slate-900 group-hover:text-primary-600 transition-colors block"
                                                 >
-                                                    Delete
-                                                </Dropdown.Link>
-                                            </Dropdown.Content>
-                                        </Dropdown>
-                                    </TableActions>
+                                                    {profile.profile_name}
+                                                </Link>
+                                                <span className="text-[11px] text-slate-400 font-medium">
+                                                    ID: REC-{String(profile.id).padStart(5, '0')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                            {profile.interval}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1">
+                                            <div className="text-[11px] text-slate-400 font-medium uppercase tracking-tight">
+                                                Last: {profile.last_run_date ? formatDate(profile.last_run_date) : 'Infinite Wait'}
+                                            </div>
+                                            <div className="text-[11px] text-indigo-500 font-semibold uppercase tracking-tight bg-indigo-50 px-1.5 py-0.5 rounded w-fit">
+                                                Next: {profile.next_run_date ? formatDate(profile.next_run_date) : 'No Schedule'}
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Badge 
+                                            variant={getStatusVariant(profile.status)} 
+                                            className="font-medium text-[10px] uppercase tracking-wide"
+                                        >
+                                            {profile.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell align="right" className="pr-6">
+                                        <span className="text-sm font-bold text-slate-900">
+                                            {formatCurrency(profile.total_amount)}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell align="right" className="pr-6">
+                                        <TableActions>
+                                            <Dropdown>
+                                                <Dropdown.Trigger>
+                                                    <button className="p-2.5 rounded-xl hover:bg-white hover:shadow-md text-slate-400 hover:text-slate-900 transition-all active:scale-95 border border-transparent hover:border-slate-100">
+                                                        <MoreVertical className="w-5 h-5" />
+                                                    </button>
+                                                </Dropdown.Trigger>
+                                                <Dropdown.Content align="right" width="48">
+                                                    <Dropdown.Link href={route('recurring-invoices.show', profile.id)} className="flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-xl transition-all">
+                                                        <ExternalLink className="w-4 h-4 opacity-50" />
+                                                        Verify Profile
+                                                    </Dropdown.Link>
+                                                    <Dropdown.Link href={route('recurring-invoices.edit', profile.id)} className="flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 hover:text-amber-600 hover:bg-amber-50/50 rounded-xl transition-all">
+                                                        <Edit2 className="w-4 h-4 opacity-50" />
+                                                        Refine Engine
+                                                    </Dropdown.Link>
+                                                    <div className="h-px bg-slate-50 my-1 mx-2"></div>
+                                                    <button
+                                                        onClick={() => setDeleteId(profile.id)}
+                                                        className="flex items-center gap-3 w-full text-left px-4 py-3 text-[11px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 hover:bg-red-50/50 rounded-xl transition-all"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 opacity-50" />
+                                                        Kill Process
+                                                    </button>
+                                                </Dropdown.Content>
+                                            </Dropdown>
+                                        </TableActions>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={6} className="py-32 text-center bg-slate-50/20">
+                                    <div className="flex flex-col items-center gap-6 max-w-sm mx-auto">
+                                        <div className="w-20 h-20 rounded-[2.5rem] bg-white shadow-premium-soft flex items-center justify-center text-slate-200">
+                                            <RefreshCw className="w-10 h-10" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-base font-black text-slate-900 uppercase tracking-widest">Automation Idle</p>
+                                            <p className="text-xs text-slate-400 font-bold leading-relaxed px-4">
+                                                No recurring automation profiles indexed in the current administrative registry.
+                                            </p>
+                                        </div>
+                                        <Button 
+                                            variant="soft" 
+                                            className="h-11 border-slate-200"
+                                            onClick={() => router.visit(route('recurring-invoices.create'))}
+                                        >
+                                            Schedule First Profile
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell colSpan={7} className="h-24 text-center text-gray-500">
-                                No recurring invoice profiles found.
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-            </div>
-            </CardContent>
+                        )}
+                    </TableBody>
+                </Table>
             </Card>
+
+            <DeleteConfirmation
+                show={deleteId !== null}
+                title="Decommission Automation Profile"
+                message="Are you sure you want to kill this automation profile? Scheduled document generation will cease immediately."
+                onConfirm={() => {
+                    router.delete(route('recurring-invoices.destroy', deleteId!), {
+                        onSuccess: () => setDeleteId(null),
+                    });
+                }}
+                onCancel={() => setDeleteId(null)}
+            />
         </AuthenticatedLayout>
     );
 }

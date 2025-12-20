@@ -1,14 +1,19 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import Card, { CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
+import Card, { CardContent } from '@/Components/ui/Card';
+import Badge from '@/Components/ui/Badge';
 import Button from '@/Components/ui/Button';
-import StatusBadge from '@/Components/ui/StatusBadge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
+import PageHeader from '@/Components/ui/PageHeader';
+import Toolbar from '@/Components/ui/Toolbar';
 import Input from '@/Components/ui/Input';
-import { Plus, Search, Filter } from 'lucide-react';
+import Select from '@/Components/ui/Select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableActions } from '@/Components/ui/Table';
+import { Plus, Search, FileText, ExternalLink, Calendar, User, MoreVertical, Activity, Edit2 } from 'lucide-react';
 import { PaginatedData, CreditNote } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { useState, useEffect } from 'react';
+import clsx from 'clsx';
+import Dropdown from '@/Components/Dropdown';
 
 interface CreditNotesProps {
     creditNotes: PaginatedData<CreditNote>;
@@ -20,15 +25,19 @@ interface CreditNotesProps {
 
 export default function CreditNotes({ creditNotes, filters }: CreditNotesProps) {
     const [search, setSearch] = useState(filters.search || '');
-    const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
+    const [statusFilter, setStatusFilter] = useState(filters.status || '');
 
-    // Debounce search
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (search !== (filters.search || '') || statusFilter !== (filters.status || 'all')) {
+            if (search !== (filters.search || '') || statusFilter !== (filters.status || '')) {
+                const params = { search, status: statusFilter };
+                const cleanParams = Object.fromEntries(
+                    Object.entries(params).filter(([_, v]) => v)
+                );
+                
                 router.get(
                     route('credit-notes.index'),
-                    { search, status: statusFilter },
+                    cleanParams,
                     { preserveState: true, replace: true }
                 );
             }
@@ -37,117 +46,153 @@ export default function CreditNotes({ creditNotes, filters }: CreditNotesProps) 
         return () => clearTimeout(timer);
     }, [search, statusFilter]);
 
+    const getStatusVariant = (status: string) => {
+        switch (status) {
+            case 'sent':
+                return 'primary';
+            case 'refunded':
+                return 'success';
+            case 'draft':
+                return 'secondary';
+            default:
+                return 'soft';
+        }
+    };
+
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800 font-heading">
-                        Credit Notes
-                    </h2>
-                    <Button variant="primary" icon={<Plus className="w-5 h-5" />} onClick={() => router.visit(route('credit-notes.create'))}>
-                        Create Credit Note
+        <AuthenticatedLayout>
+            <Head title="Credit Notes Management" />
+
+            <PageHeader 
+                title="Credit Notes"
+                subtitle="Issue and manage credit memos and customer refunds"
+                actions={
+                    <Button 
+                        variant="primary" 
+                        icon={<Plus className="w-5 h-5" />} 
+                        onClick={() => router.visit(route('credit-notes.create'))}
+                    >
+                        New Credit Note
                     </Button>
-                </div>
-            }
-        >
-            <Head title="Credit Notes" />
+                }
+            />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    {/* Filters */}
-                    <Card className="mb-6">
-                        <CardContent className="p-4">
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="flex-1 relative">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search credit notes..."
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                    />
-                                </div>
-                                <select
-                                    className="rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 h-[42px]"
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                >
-                                    <option value="all">All Statuses</option>
-                                    <option value="draft">Draft</option>
-                                    <option value="sent">Sent</option>
-                                    <option value="refunded">Refunded</option>
-                                </select>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Credit Notes Table */}
-                    <Card>
-                        <CardContent className="p-0">
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Number</TableHead>
-                                            <TableHead>Customer</TableHead>
-                                            {/*<TableHead>Ref Invoice</TableHead>*/}
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Amount</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {creditNotes.data.length > 0 ? (
-                                            creditNotes.data.map((note) => (
-                                                <TableRow key={note.id}>
-                                                    <TableCell className="font-medium">
-                                                        <Link
-                                                            href={route('credit-notes.show', note.id)}
-                                                            className="text-primary-600 hover:text-primary-700"
-                                                        >
-                                                            {note.number}
-                                                        </Link>
-                                                    </TableCell>
-                                                    <TableCell className="text-gray-900">
-                                                        {note.customer?.name}
-                                                    </TableCell>
-                                                    {/*<TableCell className="text-gray-600">
-                                                        {note.invoice ? note.invoice.number : '-'}
-                                                    </TableCell>*/}
-                                                    <TableCell className="text-gray-600">
-                                                        {formatDate(note.date)}
-                                                    </TableCell>
-                                                    <TableCell className="font-semibold text-gray-900">
-                                                        {formatCurrency(note.amount)}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                         <StatusBadge status={note.status} />
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <Link href={route('credit-notes.show', note.id)}>
-                                                            <Button variant="ghost" size="sm">
-                                                                View
-                                                            </Button>
-                                                        </Link>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        ) : (
-                                            <TableRow>
-                                                <TableCell colSpan={6} className="text-center text-gray-500 h-24">
-                                                    No credit notes found.
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </CardContent>
-                    </Card>
+            <Toolbar className="mb-8 p-4">
+                <div className="flex flex-col md:flex-row gap-4 w-full items-center">
+                    <div className="relative flex-1 w-full">
+                        <Input
+                            placeholder="Locate note by number or customer..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            icon={<Search className="w-4 h-4" />}
+                        />
+                    </div>
+                    <div className="w-full md:w-64">
+                         <Select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            icon={<Activity className="w-4 h-4 text-slate-400" />}
+                        >
+                            <option value="">Note Status</option>
+                            <option value="draft">Draft</option>
+                            <option value="sent">Sent</option>
+                            <option value="refunded">Refunded</option>
+                        </Select>
+                    </div>
                 </div>
-            </div>
+            </Toolbar>
+
+            <Card className="border-none shadow-sm overflow-hidden">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="pl-6">Note #</TableHead>
+                            <TableHead>Customer</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead align="right">Amount</TableHead>
+                            <TableHead align="right">Status</TableHead>
+                            <TableHead align="right" className="pr-6">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {creditNotes.data.length > 0 ? (
+                            creditNotes.data.map((note) => (
+                                <TableRow key={note.id} className="group">
+                                    <TableCell className="pl-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-primary-600 transition-colors">
+                                                <FileText className="w-4 h-4" />
+                                            </div>
+                                            <Link
+                                                href={route('credit-notes.show', note.id)}
+                                                className="text-sm font-semibold text-slate-900 hover:text-primary-600 transition-colors block"
+                                            >
+                                                {note.number}
+                                            </Link>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="text-sm font-medium text-slate-700">
+                                            {note.customer?.name}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="text-[13px] text-slate-600 font-medium">
+                                            {formatDate(note.date)}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <span className="text-sm font-bold text-slate-900">
+                                            {formatCurrency(note.amount)}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Badge 
+                                            variant={getStatusVariant(note.status)} 
+                                            className="font-medium text-[10px] uppercase tracking-wide"
+                                        >
+                                            {note.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell align="right" className="pr-6">
+                                        <TableActions>
+                                            <Dropdown>
+                                                <Dropdown.Trigger>
+                                                    <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-all border border-transparent">
+                                                        <MoreVertical className="w-4 h-4" />
+                                                    </button>
+                                                </Dropdown.Trigger>
+                                                <Dropdown.Content align="right" width="48">
+                                                    <Dropdown.Link href={route('credit-notes.show', note.id)} className="flex items-center gap-2 text-sm">
+                                                        <ExternalLink className="w-4 h-4 opacity-50" />
+                                                        View Details
+                                                    </Dropdown.Link>
+                                                    <Dropdown.Link href={route('credit-notes.edit', note.id)} className="flex items-center gap-2 text-sm">
+                                                        <Edit2 className="w-4 h-4 opacity-50" />
+                                                        Edit Record
+                                                    </Dropdown.Link>
+                                                </Dropdown.Content>
+                                            </Dropdown>
+                                        </TableActions>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={6} className="py-24 text-center">
+                                    <div className="flex flex-col items-center gap-3 text-slate-400">
+                                        <div className="p-4 bg-slate-50 rounded-full">
+                                            <FileText className="w-8 h-8" />
+                                        </div>
+                                        <p className="text-sm font-bold text-slate-900">No credit notes found</p>
+                                        <p className="text-xs">Issued credit memos will appear here when created.</p>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </Card>
         </AuthenticatedLayout>
     );
 }
