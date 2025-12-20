@@ -3,33 +3,39 @@ import { SVGAttributes } from 'react';
 export default function ApplicationLogo(props: SVGAttributes<SVGElement>) {
     return (
         <svg
-            viewBox="0 0 100 100"
+            viewBox="0 0 64 64"
+            fill="none"
             xmlns="http://www.w3.org/2000/svg"
             {...props}
         >
-            <defs>
-                <linearGradient id="newLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#4338ca" />
-                    <stop offset="100%" stopColor="#6366f1" />
-                </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="45" fill="url(#newLogoGradient)" />
-            <path 
-                d="M30 60 L45 45 L55 55 L70 30" 
-                stroke="white" 
-                strokeWidth="8" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                fill="none"
+            {/* Hexagonal Base Stucture - Represents Security & Foundation */}
+            {/* Split "F" Concept: 
+                - Left vertical bar (Foundation)
+                - Top horizontal bar (Structure)
+                - Middle horizontal bar (Execution/Fact) 
+            */}
+            
+            <path
+                stroke="currentColor" 
+                strokeWidth="0"
+                fill="currentColor"
+                d="
+                    M 18,12 
+                    L 46,12 
+                    L 52,22 
+                    L 30,22 
+                    L 30,30 
+                    L 46,30 
+                    L 50,40 
+                    L 30,40 
+                    L 30,52 
+                    L 18,52 
+                    Z
+                "
             />
-            <path 
-                d="M70 30 L70 45 M70 30 L55 30" 
-                stroke="white" 
-                strokeWidth="8" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                fill="none" 
-            />
+            
+            {/* Dynamic "Fact" Point / Checkmark Accent */}
+            <circle cx="48" cy="48" r="6" fill="#6366f1" />
         </svg>
     );
 }

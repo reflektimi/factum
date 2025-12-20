@@ -86,10 +86,10 @@ export default function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
         >
             {/* Logo Area */}
             <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-active/50">
-                <div className={clsx("flex items-center gap-2 overflow-hidden", isCollapsed && "justify-center w-full")}>
-                    <ApplicationLogo className="h-8 w-8 fill-indigo-500 shrink-0" />
-                    <span className={clsx("font-bold text-lg whitespace-nowrap transition-opacity duration-200", isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
-                        Finances
+                <div className={clsx("flex items-center gap-3 overflow-hidden", isCollapsed && "justify-center w-full")}>
+                    <ApplicationLogo className="h-9 w-9 shrink-0" />
+                    <span className={clsx("font-bold text-xl tracking-tight text-white whitespace-nowrap transition-opacity duration-200", isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
+                        Factum
                     </span>
                 </div>
                 {/* Toggle Button (Desktop only usually, but handled by props) */}
