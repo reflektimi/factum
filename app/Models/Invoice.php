@@ -3,21 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToUser;
+use App\Traits\LogsActivity;
+use App\Models\DocumentLineItem;
+use App\Models\Payment;
+use App\Models\Account;
 
 class Invoice extends Model
 {
+    use BelongsToUser, LogsActivity;
+
     protected $fillable = [
+        'user_id',
         'number',
         'customer_id',
         'date',
         'due_date',
-        'items',
         'total_amount',
         'status',
     ];
 
     protected $casts = [
-        'items' => 'array',
         'date' => 'date',
         'due_date' => 'date',
         'total_amount' => 'decimal:2',
@@ -37,5 +43,10 @@ class Invoice extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function lineItems()
+    {
+        return $this->morphMany(DocumentLineItem::class, 'documentable');
     }
 }

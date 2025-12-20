@@ -2,8 +2,8 @@ import React, { HTMLAttributes } from 'react';
 import clsx from 'clsx';
 import { getStatusColor } from '@/utils/format';
 
-interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-    variant?: 'default' | 'status' | 'success' | 'danger' | 'warning' | 'info';
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+    variant?: 'default' | 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'status' | 'soft';
     status?: string;
 }
 
@@ -14,26 +14,21 @@ export default function Badge({
     className,
     ...props
 }: BadgeProps) {
-    const baseClasses = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+    const baseClasses = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold transition-all antialiased select-none';
     
-    let colorClasses = 'bg-primary-100 text-primary-800'; // default
-
-    if (variant === 'status' && status) {
-        colorClasses = getStatusColor(status);
-    } else {
-        const variants = {
-            default: 'bg-gray-100 text-gray-800',
-            success: 'bg-green-100 text-green-800',
-            danger: 'bg-red-100 text-red-800',
-            warning: 'bg-yellow-100 text-yellow-800',
-            info: 'bg-blue-100 text-blue-800',
-        };
-        // @ts-ignore
-        if (variants[variant]) {
-             // @ts-ignore
-            colorClasses = variants[variant];
-        }
-    }
+    const variants = {
+        default: 'bg-slate-100 text-slate-700',
+        primary: 'bg-primary-50 text-primary-700 font-bold',
+        secondary: 'bg-slate-200 text-slate-800',
+        success: 'bg-emerald-50 text-emerald-700',
+        danger: 'bg-red-50 text-red-700',
+        warning: 'bg-amber-50 text-amber-700',
+        info: 'bg-sky-50 text-sky-700',
+        soft: 'bg-white shadow-sm border border-slate-100 text-slate-600',
+        status: status ? getStatusColor(status) : 'bg-slate-100 text-slate-700',
+    };
+    
+    const colorClasses = variant === 'status' ? variants.status : (variants[variant] || variants.default);
     
     return (
         <span

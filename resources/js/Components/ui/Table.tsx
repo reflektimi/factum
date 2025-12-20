@@ -14,7 +14,7 @@ export function Table({ className, children, ...props }: HTMLAttributes<HTMLTabl
 
 export function TableHeader({ className, children, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
     return (
-        <thead className={clsx("[&_tr]:border-b bg-slate-50/50", className)} {...props}>
+        <thead className={clsx("bg-slate-50/50 border-b border-slate-200 sticky top-0 z-10 backdrop-blur-md", className)} {...props}>
             {children}
         </thead>
     );
@@ -22,7 +22,7 @@ export function TableHeader({ className, children, ...props }: HTMLAttributes<HT
 
 export function TableBody({ className, children, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
     return (
-        <tbody className={clsx("[&_tr:last-child]:border-0", className)} {...props}>
+        <tbody className={clsx("divide-y divide-slate-100", className)} {...props}>
             {children}
         </tbody>
     );
@@ -32,7 +32,7 @@ export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttribut
     <tr
         ref={ref}
         className={clsx(
-            "border-b border-slate-200 transition-colors hover:bg-slate-100/50 data-[state=selected]:bg-slate-100",
+            "transition-colors hover:bg-slate-50/50 data-[state=selected]:bg-slate-100",
             className
         )}
         {...props}
@@ -42,11 +42,18 @@ export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttribut
 ));
 TableRow.displayName = "TableRow";
 
-export function TableHead({ className, children, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
+export interface TableCellProps extends ThHTMLAttributes<HTMLTableCellElement> {
+    align?: 'left' | 'center' | 'right';
+}
+
+export function TableHead({ className, children, align = 'left', ...props }: TableCellProps) {
     return (
         <th
             className={clsx(
-                "h-12 px-4 text-left align-middle font-medium text-slate-500 [&:has([role=checkbox])]:pr-0",
+                "h-12 px-6 text-slate-500 font-semibold text-xs uppercase tracking-wider align-middle",
+                align === 'left' && "text-left",
+                align === 'center' && "text-center",
+                align === 'right' && "text-right",
                 className
             )}
             {...props}
@@ -56,11 +63,14 @@ export function TableHead({ className, children, ...props }: ThHTMLAttributes<HT
     );
 }
 
-export function TableCell({ className, children, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
+export function TableCell({ className, children, align = 'left', ...props }: TdHTMLAttributes<HTMLTableCellElement> & { align?: 'left' | 'center' | 'right' }) {
     return (
         <td
             className={clsx(
-                "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-body text-slate-700",
+                "px-6 py-4 align-middle font-body text-slate-600 text-sm whitespace-nowrap",
+                align === 'left' && "text-left",
+                align === 'center' && "text-center",
+                align === 'right' && "text-right",
                 className
             )}
             {...props}

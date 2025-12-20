@@ -3,15 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToUser;
 
 class Payment extends Model
 {
+    use BelongsToUser;
+
     protected $fillable = [
+        'user_id',
         'invoice_id',
         'customer_id',
         'amount',
-        'payment_method',
         'date',
+        'payment_method',
+        'reference_number',
         'status',
     ];
 

@@ -83,6 +83,83 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Financial Insights
+        $insights = \App\Models\FinancialInsight::active()
+            ->orderBy('severity', 'desc') // Critical first
+            ->orderBy('detected_at', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function ($insight) {
+                return [
+                    'id' => $insight->id,
+                    'type' => $insight->type,
+                    'category' => $insight->category,
+                    'severity' => $insight->severity,
+                    'title' => $insight->title,
+                    'description' => $insight->description,
+                    'recommendation' => $insight->recommendation,
+                    'impact_amount' => $insight->impact_amount,
+                    'detected_at' => $insight->detected_at->diffForHumans(),
+                ];
+            });
+
+        // Cash Flow Forecasts
+        $forecastData = null;
+        $latestConservative = \App\Models\CashFlowForecast::scenario('conservative')
+            ->where('generated_at', '>=', now()->subDay())
+            ->orderBy('forecast_date')
+            ->first();
+
+        if ($latestConservative) {
+            // Get all scenarios for the same generation time
+            $generatedAt = $latestConservative->generated_at;
+            
+            $forecastData = [
+                'optimistic' => \App\Models\CashFlowForecast::scenario('optimistic')
+                    ->where('generated_at', $generatedAt)
+                    ->orderBy('forecast_date')
+                    ->get()
+                    ->map(function ($f) {
+                        return [
+                            'forecast_date' => $f->forecast_date->format('Y-m-d'),
+                            'projected_balance' => $f->projected_balance,
+                            'total_inflow' => $f->total_inflow,
+                            'total_outflow' => $f->total_outflow,
+                            'net_cash_flow' => $f->net_cash_flow,
+                            'confidence_score' => $f->confidence_score,
+                        ];
+                    }),
+                'conservative' => \App\Models\CashFlowForecast::scenario('conservative')
+                    ->where('generated_at', $generatedAt)
+                    ->orderBy('forecast_date')
+                    ->get()
+                    ->map(function ($f) {
+                        return [
+                            'forecast_date' => $f->forecast_date->format('Y-m-d'),
+                            'projected_balance' => $f->projected_balance,
+                            'total_inflow' => $f->total_inflow,
+                            'total_outflow' => $f->total_outflow,
+                            'net_cash_flow' => $f->net_cash_flow,
+                            'confidence_score' => $f->confidence_score,
+                        ];
+                    }),
+                'pessimistic' => \App\Models\CashFlowForecast::scenario('pessimistic')
+                    ->where('generated_at', $generatedAt)
+                    ->orderBy('forecast_date')
+                    ->get()
+                    ->map(function ($f) {
+                        return [
+                            'forecast_date' => $f->forecast_date->format('Y-m-d'),
+                            'projected_balance' => $f->projected_balance,
+                            'total_inflow' => $f->total_inflow,
+                            'total_outflow' => $f->total_outflow,
+                            'net_cash_flow' => $f->net_cash_flow,
+                            'confidence_score' => $f->confidence_score,
+                        ];
+                    }),
+            ];
+        }
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'totalInvoices' => $totalInvoices,
@@ -94,6 +171,8 @@ class DashboardController extends Controller
             'recentInvoices' => $recentInvoices,
             'recentPayments' => $recentPayments,
             'chartData' => $chartData,
+            'insights' => $insights,
+            'forecasts' => $forecastData,
         ]);
     }
 }

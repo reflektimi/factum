@@ -18,8 +18,15 @@ export const formatCurrency = (amount: number, currency: string = 'USD'): string
 /**
  * Format date values
  */
-export const formatDate = (date: string | Date, format: 'short' | 'long' = 'short'): string => {
+export const formatDate = (date: string | Date | null | undefined, format: 'short' | 'long' = 'short'): string => {
+    if (!date) return 'N/A';
+    
     const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // Check if date is invalid
+    if (isNaN(dateObj.getTime())) {
+        return 'N/A';
+    }
     
     if (format === 'long') {
         return new Intl.DateTimeFormat('en-US', {

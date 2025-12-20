@@ -33,7 +33,7 @@ export default function Authenticated({
     return (
         <>
             <FlashMessage />
-            <div className="min-h-screen font-sans flex">
+            <div className="min-h-screen font-sans flex bg-slate-50 text-slate-900">
                 
                 {/* Sidebar */}
                 <div className="print:hidden">
@@ -41,21 +41,25 @@ export default function Authenticated({
                 </div>
 
                 {/* Main Content Area */}
-                <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} print:ml-0`}>
+                <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} print:ml-0 overflow-hidden`}>
                     
                     {/* Header */}
-                    <div className="print:hidden">
+                    <div className="print:hidden border-b border-slate-200 bg-white">
                         <TopHeader toggleSidebar={toggleSidebar} />
                     </div>
 
                     {/* Page Content */}
-                    <main className="flex-1 p-6 md:p-8 animate-fade-in bg-gray-200 text-white">
-                        {header && (
-                            <div className="mb-8">
-                                 {header}
+                    <main className="flex-1 overflow-y-auto animate-fade-in p-6 lg:p-10">
+                        <div className="max-w-7xl mx-auto w-full">
+                            {header && (
+                                <div className="mb-6">
+                                     {header}
+                                </div>
+                            )}
+                            <div className="w-full">
+                                {children}
                             </div>
-                        )}
-                        {children}
+                        </div>
                     </main>
                 </div>
             </div>

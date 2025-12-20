@@ -23,14 +23,22 @@ Route::middleware('auth')->group(function () {
     
     // Finance Resources
     Route::resource('invoices', App\Http\Controllers\InvoiceController::class);
+    Route::get('invoices/{invoice}/download', [App\Http\Controllers\InvoiceController::class, 'download'])->name('invoices.download');
+    Route::post('invoices/{invoice}/resend', [App\Http\Controllers\InvoiceController::class, 'resend'])->name('invoices.resend');
+    Route::get('invoices/{invoice}/public', [App\Http\Controllers\InvoiceController::class, 'publicView'])->name('invoices.public');
     Route::resource('payments', App\Http\Controllers\PaymentController::class);
     Route::resource('accounts', App\Http\Controllers\AccountController::class);
     Route::resource('quotes', App\Http\Controllers\QuoteController::class);
+    Route::get('quotes/{quote}/download', [App\Http\Controllers\QuoteController::class, 'download'])->name('quotes.download');
     Route::post('quotes/{quote}/convert', [App\Http\Controllers\QuoteController::class, 'convert'])->name('quotes.convert');
+    Route::post('quotes/{quote}/resend', [App\Http\Controllers\QuoteController::class, 'resend'])->name('quotes.resend');
+    Route::get('quotes/{quote}/public', [App\Http\Controllers\QuoteController::class, 'publicView'])->name('quotes.public');
     Route::resource('credit-notes', App\Http\Controllers\CreditNoteController::class);
     Route::resource('expenses', App\Http\Controllers\ExpenseController::class);
     Route::resource('recurring-invoices', App\Http\Controllers\RecurringInvoiceController::class);
+    Route::post('recurring-invoices/{recurring_invoice}/run', [App\Http\Controllers\RecurringInvoiceController::class, 'run'])->name('recurring-invoices.run');
     Route::resource('reports', App\Http\Controllers\ReportController::class);
+    Route::get('reports/{report}/download', [App\Http\Controllers\ReportController::class, 'download'])->name('reports.download');
     
     // Settings & Users
     Route::get('/settings', [App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');

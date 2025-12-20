@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\RecurringInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ProcessRecurringInvoices extends Command
 {
@@ -33,7 +34,8 @@ class ProcessRecurringInvoices extends Command
         
         $this->info("Checking for recurring invoices due on or before: " . $today->toDateString());
 
-        $profiles = RecurringInvoice::where('status', 'active')
+        $profiles = RecurringInvoice::with('lineItems')
+            ->where('status', 'active')
             ->whereDate('next_run_date', '<=', $today)
             ->get();
 
@@ -48,47 +50,63 @@ class ProcessRecurringInvoices extends Command
             $this->info("Processing profile: {$profile->profile_name} (ID: {$profile->id})");
 
             try {
-                // Generate Invoice Number (Simple format for automated invoices)
-                // In production, check for uniqueness strictly or use a sequence
-                $year = date('Y');
-                $random = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
-                $invoiceNumber = "INV-REC-{$year}-{$random}-{$profile->id}";
+                DB::transaction(function () use ($profile, $today, &$count) {
+                    // Generate Invoice Number
+                    $year = date('Y');
+                    $random = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+                    $invoiceNumber = "INV-REC-{$year}-{$random}-{$profile->id}";
 
-                // Create Invoice
-                $invoice = Invoice::create([
-                    'number' => $invoiceNumber,
-                    'customer_id' => $profile->customer_id,
-                    'date' => $today,
-                    'due_date' => $today->copy()->addDays(14), // Default 14 days due
-                    'status' => $profile->auto_send ? 'sent' : 'draft',
-                    'items' => $profile->items,
-                    'total_amount' => $profile->total_amount,
-                    'notes' => "Automatically generated from recurring profile: {$profile->profile_name}",
-                ]);
+                    // Create Invoice
+                    $invoice = Invoice::create([
+                        'user_id' => $profile->user_id,
+                        'number' => $invoiceNumber,
+                        'customer_id' => $profile->customer_id,
+                        'date' => $today,
+                        'due_date' => $today->copy()->addDays(14),
+                        'status' => $profile->auto_send ? 'sent' : 'draft',
+                        'total_amount' => $profile->total_amount,
+                        'notes' => "Automatically generated from recurring profile: {$profile->profile_name}",
+                    ]);
 
-                // Calculate next run date
-                $nextRun = Carbon::parse($profile->next_run_date);
-                
-                switch ($profile->interval) {
-                    case 'monthly':
-                        $nextRun->addMonth();
-                        break;
-                    case 'quarterly':
-                        $nextRun->addMonths(3);
-                        break;
-                    case 'yearly':
-                        $nextRun->addYear();
-                        break;
-                }
+                    // Copy Line Items
+                    foreach ($profile->lineItems as $item) {
+                        $invoice->lineItems()->create([
+                            'user_id' => $profile->user_id,
+                            'description' => $item->description,
+                            'quantity' => $item->quantity,
+                            'unit_price' => $item->unit_price,
+                            'subtotal' => $item->subtotal,
+                            'tax_rate' => $item->tax_rate,
+                            'tax_amount' => $item->tax_amount,
+                            'total' => $item->total,
+                            'sort_order' => $item->sort_order,
+                        ]);
+                    }
 
-                $profile->update([
-                    'last_run_date' => $today,
-                    'next_run_date' => $nextRun,
-                ]);
-                
-                $this->info("  -> Generated Invoice: {$invoice->number}");
-                $this->info("  -> Next run date set to: {$nextRun->toDateString()}");
-                $count++;
+                    // Calculate next run date
+                    $nextRun = Carbon::parse($profile->next_run_date);
+                    
+                    switch ($profile->interval) {
+                        case 'monthly':
+                            $nextRun->addMonth();
+                            break;
+                        case 'quarterly':
+                            $nextRun->addMonths(3);
+                            break;
+                        case 'yearly':
+                            $nextRun->addYear();
+                            break;
+                    }
+
+                    $profile->update([
+                        'last_run_date' => $today,
+                        'next_run_date' => $nextRun,
+                    ]);
+                    
+                    $this->info("  -> Generated Invoice: {$invoice->number}");
+                    $this->info("  -> Next run date set to: {$nextRun->toDateString()}");
+                    $count++;
+                });
 
             } catch (\Exception $e) {
                 $this->error("  -> Failed to process profile ID {$profile->id}: " . $e->getMessage());

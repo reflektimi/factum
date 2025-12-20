@@ -22,13 +22,17 @@ class SearchController extends Controller
             return response()->json([]);
         }
 
+        $userId = auth()->id();
         $results = [];
 
         // Search Invoices
         $invoices = Invoice::with('customer')
-            ->where('number', 'like', "%{$query}%")
-            ->orWhereHas('customer', function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%");
+            ->where('user_id', $userId)
+            ->where(function($q) use ($query) {
+                $q->where('number', 'like', "%{$query}%")
+                  ->orWhereHas('customer', function ($q) use ($query) {
+                      $q->where('name', 'like', "%{$query}%");
+                  });
             })
             ->limit(5)
             ->get()
@@ -44,8 +48,11 @@ class SearchController extends Controller
             });
 
         // Search Accounts
-        $accounts = Account::where('name', 'like', "%{$query}%")
-            ->orWhere('contact_info->email', 'like', "%{$query}%")
+        $accounts = Account::where('user_id', $userId)
+            ->where(function($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('contact_info->email', 'like', "%{$query}%");
+            })
             ->limit(5)
             ->get()
             ->map(function ($account) {
@@ -54,16 +61,19 @@ class SearchController extends Controller
                     'title' => $account->name,
                     'subtitle' => $account->type,
                     'type' => 'Account',
-                    'url' => route('accounts.edit', $account->id), // Accounts usually edit/show
+                    'url' => route('accounts.edit', $account->id),
                     'status' => null,
                 ];
             });
 
         // Search Quotes
         $quotes = Quote::with('customer')
-            ->where('number', 'like', "%{$query}%")
-             ->orWhereHas('customer', function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%");
+            ->where('user_id', $userId)
+            ->where(function($q) use ($query) {
+                $q->where('number', 'like', "%{$query}%")
+                  ->orWhereHas('customer', function ($q) use ($query) {
+                      $q->where('name', 'like', "%{$query}%");
+                  });
             })
             ->limit(3)
             ->get()
@@ -79,7 +89,8 @@ class SearchController extends Controller
             });
 
         // Search Recurring Profiles
-         $recurring = RecurringInvoice::where('profile_name', 'like', "%{$query}%")
+        $recurring = RecurringInvoice::where('user_id', $userId)
+            ->where('profile_name', 'like', "%{$query}%")
             ->limit(3)
             ->get()
             ->map(function ($profile) {

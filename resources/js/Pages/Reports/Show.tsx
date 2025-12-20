@@ -1,142 +1,96 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import Card, { CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
+import Badge from '@/Components/ui/Badge';
 import Button from '@/Components/ui/Button';
-import { ArrowLeft, Printer, Download, Calendar, User, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/utils/format';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
+import { ArrowLeft, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
-interface Report {
+interface ReportLineItem {
     id: number;
-    title: string;
-    type: string;
-    data: any;
-    generated_at: string;
-    generated_by?: {
-        name: string;
+    section: string;
+    category: string;
+    subcategory?: string;
+    line_item_name: string;
+    amount: number;
+    description?: string;
+    source_transactions?: any[];
+    display_order: number;
+}
+
+interface ReportShowProps {
+    report: {
+        id: number;
+        title: string;
+        type: string;
+        start_date?: string;
+        end_date?: string;
+        as_of_date?: string;
+        currency: string;
+        data: any;
+        generated_at: string;
+        generated_by?: { name: string };
+        line_items?: ReportLineItem[];
     };
 }
 
-interface ShowProps {
-    report: Report;
-}
+export default function Show({ report }: ReportShowProps) {
+    const [drillDownData, setDrillDownData] = useState<any>(null);
+    const [showDrillDown, setShowDrillDown] = useState(false);
 
-export default function Show({ report }: ShowProps) {
-    const renderReportContent = () => {
-        const { data } = report;
-        
-        switch (report.type) {
-            case 'income':
-                return (
-                    <div className="space-y-6">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-slate-50 p-6 rounded-xl">
-                                <p className="text-sm text-slate-500 font-medium uppercase">Total Revenue</p>
-                                <p className="text-3xl font-bold text-slate-900 mt-2">{formatCurrency(data.total_revenue)}</p>
-                            </div>
-                             <div className="bg-red-50 p-6 rounded-xl">
-                                <p className="text-sm text-red-500 font-medium uppercase">Total Expenses</p>
-                                <p className="text-3xl font-bold text-red-700 mt-2">{formatCurrency(data.total_expenses)}</p>
-                            </div>
-                            <div className={`p-6 rounded-xl ${data.net_profit >= 0 ? 'bg-green-50' : 'bg-orange-50'}`}>
-                                <p className={`text-sm font-medium uppercase ${data.net_profit >= 0 ? 'text-green-600' : 'text-orange-600'}`}>Net Profit</p>
-                                <p className={`text-3xl font-bold mt-2 ${data.net_profit >= 0 ? 'text-green-800' : 'text-orange-800'}`}>{formatCurrency(data.net_profit)}</p>
-                            </div>
-                        </div>
-                        <div className="bg-white border rounded-xl p-6">
-                            <h4 className="font-semibold text-gray-800 mb-4">Details</h4>
-                             <div className="flex justify-between py-2 border-b">
-                                <span className="text-gray-600">Revenue (This Month)</span>
-                                <span className="font-medium">{formatCurrency(data.monthly_revenue)}</span>
-                            </div>
-                        </div>
-                    </div>
-                );
-            
-            case 'outstanding':
-                return (
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-slate-50 p-6 rounded-xl">
-                                <p className="text-sm text-slate-500 font-medium uppercase">Total Outstanding</p>
-                                <p className="text-3xl font-bold text-slate-900 mt-2">{formatCurrency(data.total_outstanding)}</p>
-                            </div>
-                            <div className="bg-red-50 p-6 rounded-xl">
-                                <p className="text-sm text-red-500 font-medium uppercase">Overdue Amount</p>
-                                <p className="text-3xl font-bold text-red-700 mt-2">{formatCurrency(data.total_overdue)}</p>
-                            </div>
-                            <div className="bg-gray-50 p-6 rounded-xl">
-                                <p className="text-sm text-gray-500 font-medium uppercase">Draft Invoices</p>
-                                <p className="text-3xl font-bold text-gray-700 mt-2">{formatCurrency(data.total_draft)}</p>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'cash_flow':
-                return (
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-green-50 p-6 rounded-xl">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <TrendingUp className="w-4 h-4 text-green-600" />
-                                    <p className="text-sm text-green-600 font-medium uppercase">Inflow</p>
-                                </div>
-                                <p className="text-2xl font-bold text-green-800">{formatCurrency(data.inflow)}</p>
-                            </div>
-                            <div className="bg-red-50 p-6 rounded-xl">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <TrendingDown className="w-4 h-4 text-red-600" />
-                                    <p className="text-sm text-red-600 font-medium uppercase">Outflow</p>
-                                </div>
-                                <p className="text-2xl font-bold text-red-800">{formatCurrency(data.outflow)}</p>
-                            </div>
-                            <div className="bg-blue-50 p-6 rounded-xl">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <DollarSign className="w-4 h-4 text-blue-600" />
-                                    <p className="text-sm text-blue-600 font-medium uppercase">Net Cash Flow</p>
-                                </div>
-                                <p className="text-2xl font-bold text-blue-800">{formatCurrency(data.net)}</p>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'expenses':
-                return (
-                    <div className="space-y-6">
-                        <div className="bg-red-50 p-6 rounded-xl max-w-sm">
-                            <p className="text-sm text-red-500 font-medium uppercase">Total Expenses</p>
-                            <p className="text-3xl font-bold text-red-700 mt-2">{formatCurrency(data.total_expenses)}</p>
-                        </div>
-                        
-                        <div className="bg-white border rounded-xl overflow-hidden">
-                            <div className="px-6 py-4 border-b bg-gray-50">
-                                <h4 className="font-semibold text-gray-800">Breakdown by Category</h4>
-                            </div>
-                            <div className="divide-y">
-                                {Object.entries(data.by_category || {}).map(([category, amount]) => (
-                                    <div key={category} className="px-6 py-4 flex justify-between items-center hover:bg-gray-50">
-                                        <span className="font-medium text-gray-700">{category}</span>
-                                        <span className="font-semibold text-gray-900">{formatCurrency(amount as number)}</span>
-                                    </div>
-                                ))}
-                                {Object.keys(data.by_category || {}).length === 0 && (
-                                    <div className="px-6 py-8 text-center text-gray-500">
-                                        No expenses recorded.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            default:
-                return (
-                    <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                        <pre className="text-sm overflow-auto text-slate-700">{JSON.stringify(data, null, 2)}</pre>
-                    </div>
-                );
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('print') === 'true') {
+            setTimeout(() => window.print(), 1000);
         }
+    }, []);
+
+    const handleDrillDown = async (lineItemId: number) => {
+        try {
+            const response = await fetch(route('reports.drilldown', report.id), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({ line_item_id: lineItemId }),
+            });
+            const data = await response.json();
+            setDrillDownData(data);
+            setShowDrillDown(true);
+        } catch (error) {
+            console.error('Failed to fetch drill-down data:', error);
+        }
+    };
+
+    const groupedLineItems = (report.line_items || []).reduce((acc, item) => {
+        if (!acc[item.section]) {
+            acc[item.section] = [];
+        }
+        acc[item.section].push(item);
+        return acc;
+    }, {} as Record<string, ReportLineItem[]>);
+
+    const getSectionTitle = (section: string) => {
+        const titles: Record<string, string> = {
+            revenue: 'Revenue',
+            expenses: 'Operating Expenses',
+            profit: 'Net Profit',
+            assets: 'Assets',
+            liabilities: 'Liabilities',
+            equity: 'Equity',
+            operating: 'Operating Activities',
+            summary: 'Cash Position',
+        };
+        return titles[section] || section.toUpperCase();
+    };
+
+    const getSectionColor = (section: string) => {
+        if (section === 'profit' || section === 'revenue') return 'text-green-700';
+        if (section === 'expenses') return 'text-red-700';
+        return 'text-gray-900';
     };
 
     return (
@@ -144,43 +98,200 @@ export default function Show({ report }: ShowProps) {
             header={
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href={route('reports.index')} className="text-slate-500 hover:text-slate-700">
+                        <Link href={route('reports.index')} className="text-gray-500 hover:text-gray-700 print:hidden">
                             <ArrowLeft className="w-6 h-6" />
                         </Link>
-                        <h2 className="text-xl font-semibold leading-tight text-slate-800 font-heading">
-                            {report.title}
+                        <h2 className="text-xl font-semibold leading-tight text-gray-800 font-heading">
+                            {report?.title || 'Report'}
                         </h2>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 capitalize">
-                            {report.type.replace('_', ' ')}
-                        </span>
                     </div>
-                    <Button variant="secondary" icon={<Printer className="w-4 h-4" />} onClick={() => window.print()}>
-                        Print Report
-                    </Button>
+                    <div className="flex gap-2 print:hidden">
+                        <a href={route('reports.download', report.id)}>
+                            <Button variant="outline" size="sm">
+                                <Download className="w-4 h-4 mr-2" />
+                                Export PDF
+                            </Button>
+                        </a>
+                        <Button variant="outline" size="sm">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Excel
+                        </Button>
+                    </div>
                 </div>
             }
         >
-            <Head title={`Report: ${report.title}`} />
+            <Head title={report?.title || 'Report'} />
 
             <div className="py-8">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <Card className="print:shadow-none print:border-none">
-                        <CardHeader>
-                            <div className="flex justify-between items-center text-sm text-slate-500">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4" />
-                                    Generated on {new Date(report.generated_at).toLocaleString()}
+                <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
+                    {/* Report Header */}
+                    <Card className="mb-6">
+                        <CardContent className="p-6">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-500">Report Type</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {(report.type || '').replace('_', ' ').toUpperCase()}
+                                    </p>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <User className="w-4 h-4" />
-                                    Generated by {report.generated_by?.name || 'System'}
+                                <div>
+                                    <p className="text-sm text-gray-500">Period</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {report.type === 'balance_sheet'
+                                            ? `As of ${formatDate(report.as_of_date, 'short')}`
+                                            : [formatDate(report.start_date, 'short'), formatDate(report.end_date, 'short')].filter(d => d !== 'N/A').join(' - ') || 'N/A'}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Generated</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {report.generated_at ? formatDate(report.generated_at, 'short') : 'N/A'}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Generated By</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {report.generated_by?.name || 'System'}
+                                    </p>
                                 </div>
                             </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {renderReportContent()}
+
+                            {/* Summary Cards for P&L */}
+                            {report.type === 'profit_loss' && report.data?.summary && (
+                                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
+                                    <div className="text-center">
+                                        <p className="text-sm text-gray-500">Net Revenue</p>
+                                        <p className="text-2xl font-bold text-blue-600">
+                                            {formatCurrency(report.data.summary.net_revenue)}
+                                        </p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm text-gray-500">Total Expenses</p>
+                                        <p className="text-2xl font-bold text-red-600">
+                                            {formatCurrency(report.data.summary.total_expenses)}
+                                        </p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm text-gray-500">Net Profit</p>
+                                        <p className={`text-2xl font-bold ${report.data.summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {formatCurrency(report.data.summary.net_profit)}
+                                            {report.data.summary.net_profit >= 0 ? (
+                                                <TrendingUp className="inline-block w-5 h-5 ml-2" />
+                                            ) : (
+                                                <TrendingDown className="inline-block w-5 h-5 ml-2" />
+                                            )}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {report.data.summary.profit_margin?.toFixed(1)}% margin
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
+
+                    {/* Report Line Items */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Financial Statement</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableBody>
+                                        {Object.entries(groupedLineItems).map(([section, items]) => (
+                                            <>
+                                                {/* Section Header */}
+                                                <TableRow key={`${section}-header`} className="bg-gray-50">
+                                                    <TableCell colSpan={3} className={`font-bold text-lg py-4 ${getSectionColor(section)}`}>
+                                                        {getSectionTitle(section)}
+                                                    </TableCell>
+                                                </TableRow>
+
+                                                {/* Line Items */}
+                                                {items.map((item) => {
+                                                    const isTotal = item.category === 'Total' || item.category === 'Bottom Line';
+                                                    const isSubcategory = !!item.subcategory;
+                                                    const hasTransactions = item.source_transactions && item.source_transactions.length > 0;
+
+                                                    return (
+                                                        <TableRow
+                                                            key={item.id}
+                                                            className={`${isTotal ? 'bg-gray-50 border-t-2 border-gray-300' : ''} ${hasTransactions ? 'hover:bg-gray-50 cursor-pointer' : ''}`}
+                                                            onClick={() => hasTransactions && handleDrillDown(item.id)}
+                                                        >
+                                                            <TableCell className={`${isTotal ? 'font-bold' : ''} ${isSubcategory ? 'pl-8' : 'pl-4'}`}>
+                                                                {item.line_item_name}
+                                                                {item.description && (
+                                                                    <span className="text-sm text-gray-500 ml-2">
+                                                                        ({item.description})
+                                                                    </span>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell className="text-right">
+                                                                {hasTransactions && (
+                                                                    <Badge variant="default" className="mr-2 text-xs">
+                                                                        {item.source_transactions?.length || 0} items
+                                                                    </Badge>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell className={`text-right ${isTotal ? 'font-bold text-lg' : ''} ${item.amount < 0 ? 'text-red-600' : ''}`}>
+                                                                {formatCurrency(Math.abs(item.amount))}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                            </>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Drill-Down Modal */}
+                    {showDrillDown && drillDownData && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowDrillDown(false)}>
+                            <div className="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                                <div className="p-6 border-b">
+                                    <h3 className="text-lg font-semibold">Transaction Details: {drillDownData.line_item.line_item_name}</h3>
+                                </div>
+                                <div className="overflow-auto max-h-[60vh]">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Type</TableHead>
+                                                <TableHead>Number</TableHead>
+                                                <TableHead>Date</TableHead>
+                                                <TableHead>Description</TableHead>
+                                                <TableHead className="text-right">Amount</TableHead>
+                                                <TableHead>Status</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {drillDownData.transactions.map((txn: any, idx: number) => (
+                                                <TableRow key={idx}>
+                                                    <TableCell><Badge>{txn.type}</Badge></TableCell>
+                                                    <TableCell className="font-mono text-sm">{txn.number}</TableCell>
+                                                    <TableCell>{formatDate(txn.date, 'short')}</TableCell>
+                                                    <TableCell>{txn.description}</TableCell>
+                                                    <TableCell className="text-right font-semibold">{formatCurrency(txn.amount)}</TableCell>
+                                                    <TableCell>
+                                                        <Badge variant={txn.status === 'paid' || txn.status === 'completed' ? 'success' : 'default'}>
+                                                            {txn.status}
+                                                        </Badge>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                <div className="p-4 border-t flex justify-end">
+                                    <Button onClick={() => setShowDrillDown(false)}>Close</Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>

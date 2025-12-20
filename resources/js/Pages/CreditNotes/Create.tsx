@@ -1,11 +1,13 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
-import Card, { CardContent, CardHeader, CardTitle, CardFooter } from '@/Components/ui/Card';
+import Card, { CardContent } from '@/Components/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
 import Input from '@/Components/ui/Input';
+import Select from '@/Components/ui/Select';
 import Button from '@/Components/ui/Button';
-import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
-import { FormEventHandler, useState, useEffect } from 'react';
+import PageHeader from '@/Components/ui/PageHeader';
+import { Save, Plus, Trash2, ArrowLeft, Calculator, FileText, UserPlus, Calendar, Activity, Hash, AlertCircle } from 'lucide-react';
+import { FormEventHandler } from 'react';
 import { Account } from '@/types/models';
 import { formatCurrency } from '@/utils/format';
 
@@ -17,10 +19,10 @@ interface InvoiceItem {
     description: string;
     quantity: number;
     price: number;
+    total: number;
 }
 
 export default function Create({ customers }: CreateProps) {
-    // Generate simple CN number
     const generateCNNumber = () => {
         const year = new Date().getFullYear();
         const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
@@ -33,31 +35,45 @@ export default function Create({ customers }: CreateProps) {
         date: new Date().toISOString().split('T')[0],
         status: 'draft',
         notes: '',
-        items: [{ description: '', quantity: 1, price: 0 }] as InvoiceItem[],
+        items: [{ description: '', quantity: 1, price: 0, total: 0 }] as InvoiceItem[],
+        total_amount: 0,
     });
 
-    const [total, setTotal] = useState(0);
+    const updateItem = (index: number, field: keyof InvoiceItem, value: any) => {
+        const newItems = [...data.items];
+        // @ts-ignore
+        newItems[index][field] = value;
+        
+        if (field === 'quantity' || field === 'price') {
+             newItems[index].total = newItems[index].quantity * newItems[index].price;
+        }
 
-    useEffect(() => {
-        const newTotal = data.items.reduce((sum, item) => {
-            return sum + (item.quantity * item.price);
-        }, 0);
-        setTotal(newTotal);
-    }, [data.items]);
+        const total = newItems.reduce((sum, item) => sum + item.total, 0);
+
+        setData(prev => ({
+            ...prev,
+            items: newItems,
+            total_amount: total
+        }));
+    };
 
     const addItem = () => {
-        setData('items', [...data.items, { description: '', quantity: 1, price: 0 }]);
+        setData('items', [
+            ...data.items,
+            { description: '', quantity: 1, price: 0, total: 0 }
+        ]);
     };
 
     const removeItem = (index: number) => {
+        if (data.items.length === 1) return;
         const newItems = data.items.filter((_, i) => i !== index);
-        setData('items', newItems);
-    };
-
-    const updateItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
-        const newItems = [...data.items];
-        newItems[index] = { ...newItems[index], [field]: value };
-        setData('items', newItems);
+        const total = newItems.reduce((sum, item) => sum + item.total, 0);
+        
+        setData(prev => ({
+            ...prev,
+            items: newItems,
+            total_amount: total
+        }));
     };
 
     const handleSubmit: FormEventHandler = (e) => {
@@ -66,214 +82,226 @@ export default function Create({ customers }: CreateProps) {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center gap-4">
-                    <Link href={route('credit-notes.index')} className="text-gray-500 hover:text-gray-700">
-                        <ArrowLeft className="w-6 h-6" />
-                    </Link>
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800 font-heading">
-                        Create Credit Note
-                    </h2>
-                </div>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title="Create Credit Note" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-12 gap-6">
-                            {/* Left Column - 70% */}
-                            <div className="col-span-12 lg:col-span-8 space-y-6">
-                                {/* Details Card */}
-                                <Card>
-                                    <CardHeader className="pb-3 border-b border-gray-100">
-                                        <CardTitle className="text-base font-semibold">Credit Note Details</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-6 pt-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <Input
-                                                label="Credit Note Number"
-                                                value={data.number}
-                                                onChange={(e) => setData('number', e.target.value)}
-                                                error={errors.number}
-                                                className="rounded-md"
-                                                required
-                                            />
-                                            
-                                             {/* Customer Selection */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
-                                                <select
-                                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                    value={data.customer_id}
-                                                    onChange={(e) => setData('customer_id', e.target.value)}
-                                                    required
-                                                >
-                                                    <option value="">Select a customer</option>
-                                                    {customers.map((customer) => (
-                                                        <option key={customer.id} value={customer.id}>
-                                                            {customer.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                {errors.customer_id && <p className="mt-1 text-sm text-red-600">{errors.customer_id}</p>}
-                                            </div>
+            <PageHeader
+                title={
+                    <div className="flex items-center gap-3">
+                        <Link 
+                            href={route('credit-notes.index')}
+                            className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary-600 hover:border-primary-100 transition-all shadow-sm group"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </Link>
+                        <span>New Credit Note</span>
+                    </div>
+                }
+                subtitle="Issue a balance adjustment for an existing account"
+            />
 
-                                            <Input
-                                                type="date"
-                                                label="Date"
-                                                value={data.date}
-                                                onChange={(e) => setData('date', e.target.value)}
-                                                error={errors.date}
-                                                className="rounded-md"
-                                                required
-                                            />
-
-                                             {/* Status */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                                <select
-                                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                    value={data.status}
-                                                    onChange={(e) => setData('status', e.target.value)}
-                                                    required
-                                                >
-                                                    <option value="draft">Draft</option>
-                                                    <option value="sent">Sent</option>
-                                                    <option value="refunded">Refunded</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        
-                                        {/* Notes */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                                            <textarea
-                                                className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                rows={2}
-                                                value={data.notes}
-                                                onChange={(e) => setData('notes', e.target.value)}
-                                                placeholder="Reason for credit..."
-                                            ></textarea>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Items Section */}
-                                <Card className="overflow-hidden">
-                                     <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100 bg-gray-50/50">
-                                        <CardTitle className="text-base font-semibold">Items</CardTitle>
-                                        <Button type="button" variant="secondary" size="sm" onClick={addItem} icon={<Plus className="w-4 h-4" />}>
-                                            Add Item
-                                        </Button>
-                                    </CardHeader>
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                                                    <TableHead className="w-[45%] font-bold text-gray-900">Description</TableHead>
-                                                    <TableHead className="w-[15%] font-bold text-gray-900 text-right">Qty</TableHead>
-                                                    <TableHead className="w-[20%] font-bold text-gray-900 text-right">Price</TableHead>
-                                                    <TableHead className="w-[15%] font-bold text-gray-900 text-right">Total</TableHead>
-                                                    <TableHead className="w-[5%]"></TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {data.items.map((item, index) => (
-                                                    <TableRow key={index} className="hover:bg-gray-50/30">
-                                                        <TableCell className="align-top">
-                                                            <Input
-                                                                value={item.description}
-                                                                onChange={(e) => updateItem(index, 'description', e.target.value)}
-                                                                placeholder="Item description"
-                                                                className="rounded-md border-gray-300 focus:border-indigo-500"
-                                                                required
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell className="align-top">
-                                                            <Input
-                                                                type="number"
-                                                                value={item.quantity}
-                                                                onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
-                                                                min={0.01}
-                                                                step="0.01"
-                                                                className="text-right rounded-md border-gray-300 focus:border-indigo-500"
-                                                                required
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell className="align-top">
-                                                            <Input
-                                                                type="number"
-                                                                value={item.price}
-                                                                onChange={(e) => updateItem(index, 'price', parseFloat(e.target.value))}
-                                                                min={0}
-                                                                step="0.01"
-                                                                className="text-right rounded-md border-gray-300 focus:border-indigo-500"
-                                                                required
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-medium text-gray-900 pt-5 align-top">
-                                                            {formatCurrency(item.quantity * item.price)}
-                                                        </TableCell>
-                                                        <TableCell className="text-right align-top pt-4">
-                                                            <button 
-                                                                type="button" 
-                                                                onClick={() => removeItem(index)}
-                                                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                    {errors.items && (
-                                        <div className="p-4 bg-red-50 text-red-600 text-sm border-t border-red-100">
-                                            {errors.items}
-                                        </div>
-                                    )}
-                                </Card>
+            <form onSubmit={handleSubmit} className="relative">
+                <div className="grid grid-cols-12 gap-8">
+                    {/* Primary Editing Workspace */}
+                    <div className="col-span-12 lg:col-span-8 space-y-8">
+                        {/* Transaction Context Card */}
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 px-6 py-3">
+                                <FileText className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Document Context</span>
                             </div>
-
-                            {/* Right Column - 30% - Sticky Summary */}
-                            <div className="col-span-12 lg:col-span-4 relative">
-                                <div className="lg:sticky lg:top-6 space-y-6">
-                                    <Card className="border-t-4 border-t-indigo-500">
-                                        <CardHeader className="pb-3 border-b border-gray-100">
-                                            <CardTitle className="text-base font-semibold">Summary</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4 pt-6">
-                                            <div className="flex justify-between items-center text-sm text-gray-500">
-                                                <span>Items Count</span>
-                                                <span>{data.items.length}</span>
-                                            </div>
-                                            <div className="pt-4 border-t border-gray-100 flex justify-between items-end">
-                                                <span className="text-base font-bold text-gray-900">Total Credit</span>
-                                                <span className="text-2xl font-bold text-indigo-600">{formatCurrency(total)}</span>
-                                            </div>
-                                        </CardContent>
-                                        <CardFooter className="pt-4 pb-6 px-6 border-0">
-                                            <Button
-                                                type="submit"
-                                                variant="primary"
-                                                loading={processing}
-                                                className="w-full h-12 text-base font-bold bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200"
-                                                icon={<Save className="w-5 h-5" />}
-                                            >
-                                                Create Credit Note
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
+                            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-6">
+                                    <Input
+                                        label="Reference Number"
+                                        value={data.number}
+                                        onChange={(e) => setData('number', e.target.value)}
+                                        error={errors.number}
+                                        className="h-10"
+                                        icon={<Hash className="w-4 h-4" />}
+                                    />
+                                    
+                                    <Select
+                                        label="Customer Account"
+                                        value={data.customer_id}
+                                        onChange={(e) => setData('customer_id', e.target.value)}
+                                        error={errors.customer_id}
+                                        className="h-10"
+                                        icon={<UserPlus className="w-4 h-4" />}
+                                    >
+                                        <option value="">Select an account...</option>
+                                        {customers.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
+                                    </Select>
                                 </div>
+                                
+                                <div className="space-y-6">
+                                    <Input
+                                        label="Adjustment Date"
+                                        type="date"
+                                        value={data.date}
+                                        onChange={(e) => setData('date', e.target.value)}
+                                        error={errors.date}
+                                        className="h-10"
+                                        icon={<Calendar className="w-4 h-4" />}
+                                    />
+                                    
+                                    <Select
+                                        label="Initial Status"
+                                        value={data.status}
+                                        onChange={(e) => setData('status', e.target.value)}
+                                        error={errors.status}
+                                        className="h-10"
+                                        icon={<Activity className="w-4 h-4" />}
+                                    >
+                                        <option value="draft">Draft</option>
+                                        <option value="sent">Dispatched</option>
+                                        <option value="refunded">Refunded</option>
+                                    </Select>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Line Items Workspace */}
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center justify-between px-6 py-3">
+                                <div className="flex items-center gap-2">
+                                    <Calculator className="w-4 h-4 text-slate-400" />
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Adjustment Items</span>
+                                </div>
+                                <Button 
+                                    type="button" 
+                                    variant="soft" 
+                                    size="sm" 
+                                    onClick={addItem} 
+                                    icon={<Plus className="w-3.5 h-3.5" />}
+                                    className="h-8 text-[10px] font-bold uppercase tracking-widest bg-white border-slate-200"
+                                >
+                                    Add Line
+                                </Button>
                             </div>
-                        </div>
-                    </form>
+                            
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader className="bg-slate-50/50">
+                                        <TableRow className="hover:bg-transparent border-slate-100">
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 pl-8">Description</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest text-right">Qty</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest text-right">Rate</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest text-right pr-8">Credit</TableHead>
+                                            <TableHead className="w-[50px]"></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {data.items.map((item, index) => (
+                                            <TableRow key={index} className="group hover:bg-slate-50/50 transition-colors border-slate-50">
+                                                <TableCell className="py-2 pl-8">
+                                                    <input
+                                                        type="text"
+                                                        value={item.description}
+                                                        onChange={(e) => updateItem(index, 'description', e.target.value)}
+                                                        placeholder="Reason for adjustment..."
+                                                        className="w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-slate-700 placeholder:text-slate-300 p-0"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="py-2 text-right">
+                                                    <input
+                                                        type="number"
+                                                        value={item.quantity}
+                                                        onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
+                                                        className="w-20 bg-transparent border-none focus:ring-0 text-right text-sm font-mono text-slate-600 p-0"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="py-2 text-right">
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={item.price}
+                                                        onChange={(e) => updateItem(index, 'price', parseFloat(e.target.value))}
+                                                        className="w-32 bg-transparent border-none focus:ring-0 text-right text-sm font-mono text-slate-600 p-0"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="py-2 text-right pr-8 font-bold text-red-600 font-mono text-sm tracking-tight">
+                                                    {formatCurrency(item.total)}
+                                                </TableCell>
+                                                <TableCell className="py-2">
+                                                    {data.items.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeItem(index)}
+                                                            className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                            
+                            {errors.items && (
+                                <div className="p-4 flex items-center gap-3 bg-red-50 border-t border-red-100 text-red-600 text-xs font-bold animate-in slide-in-from-bottom-2">
+                                    <Activity className="w-4 h-4" />
+                                    {errors.items}
+                                </div>
+                            )}
+                        </Card>
+                    </div>
+
+                    {/* Meta & Summary Sidebar */}
+                    <div className="col-span-12 lg:col-span-4 space-y-8">
+                        <Card className="border-none shadow-premium-soft overflow-hidden sticky top-8">
+                            <div className="h-1.5 w-full bg-red-600"></div>
+                            <CardContent className="p-6 space-y-8">
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Financial Impact</h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Credit</span>
+                                            <span className="text-2xl font-bold text-red-600 font-mono tracking-tighter">
+                                                -{formatCurrency(data.total_amount)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2 mb-1">
+                                         <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
+                                         <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Internal Narrative</h3>
+                                    </div>
+                                    <textarea
+                                        value={data.notes}
+                                        onChange={(e) => setData('notes', e.target.value)}
+                                        placeholder="Reason for adjustment, internal references, or audit notes..."
+                                        className="w-full min-h-[120px] rounded-2xl border-slate-200 bg-slate-50 focus:border-red-500 focus:ring-4 focus:ring-red-50 transition-all text-sm placeholder:text-slate-300"
+                                    />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    loading={processing}
+                                    className="w-full h-11 text-xs font-bold uppercase tracking-widest bg-slate-900 hover:bg-slate-800"
+                                    icon={<Save className="w-4 h-4" />}
+                                >
+                                    Issue Credit Note
+                                </Button>
+
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                                    <Activity className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                                        Issuing this document will reduce the customer's outstanding balance. This action will be logged in the system audit trail.
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-            </div>
+            </form>
         </AuthenticatedLayout>
     );
 }

@@ -2,8 +2,11 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import Card, { CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
 import Badge from '@/Components/ui/Badge';
+import InsightCard from '@/Components/InsightCard';
+import CashFlowForecastCard from '@/Components/CashFlowForecastCard';
+import PageHeader from '@/Components/ui/PageHeader';
 import { formatCurrency, formatNumber } from '@/utils/format';
-import { FileText, CreditCard, TrendingUp, AlertCircle, ArrowUpRight, ArrowDownRight, DollarSign, Activity } from 'lucide-react';
+import { FileText, CreditCard, TrendingUp, AlertCircle, ArrowUpRight, DollarSign, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DashboardStats {
@@ -19,103 +22,117 @@ interface DashboardProps {
     recentInvoices: any[];
     recentPayments: any[];
     chartData: any[];
+    insights: any[];
+    forecasts: any;
 }
 
-export default function Dashboard({ stats, recentInvoices, recentPayments, chartData }: DashboardProps) {
+export default function Dashboard({ stats, recentInvoices, recentPayments, chartData, insights, forecasts }: DashboardProps) {
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex flex-col gap-1">
-                    <h2 className="text-2xl font-bold tracking-tight text-gray-900 font-heading">
-                        Dashboard
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                        Overview of your financial performance.
-                    </p>
-                </div>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title="Dashboard" />
 
+            <PageHeader 
+                title="Dashboard" 
+                subtitle="Overview of your financial performance." 
+            />
+
             {/* Stats Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {/* Total Revenue */}
-                <Card className="hover:shadow-md transition-shadow duration-200">
+                <Card className="hover:shadow-subtle transition-all duration-300 border-none">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between space-y-0 pb-2">
-                            <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-                            <DollarSign className="h-4 w-4 text-gray-400" />
+                        <div className="flex items-center justify-between pb-2">
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">Total Revenue</p>
+                            <div className="p-2 bg-slate-50 border border-slate-100 rounded-lg">
+                                <DollarSign className="h-4 w-4 text-slate-400" />
+                            </div>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <div className="text-2xl font-bold font-heading">{formatCurrency(stats.totalRevenue)}</div>
-                            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full flex items-center">
-                                +12% <ArrowUpRight className="w-3 h-3 ml-0.5" />
+                        <div className="flex items-baseline gap-2 mt-1">
+                            <div className="text-2xl font-bold text-slate-900 tracking-tight">{formatCurrency(stats.totalRevenue)}</div>
+                            <span className="text-[10px] font-bold text-emerald-600 uppercase bg-emerald-50 px-2 py-0.5 rounded-md">
+                                +12%
                             </span>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Outstanding Amount */}
-                <Card className="hover:shadow-md transition-shadow duration-200">
+                <Card className="hover:shadow-subtle transition-all duration-300 border-none">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between space-y-0 pb-2">
-                            <p className="text-sm font-medium text-gray-500">Outstanding</p>
-                            <AlertCircle className="h-4 w-4 text-amber-500" />
+                        <div className="flex items-center justify-between pb-2">
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">Outstanding</p>
+                            <div className="p-2 bg-slate-50 border border-slate-100 rounded-lg">
+                                <AlertCircle className="h-4 w-4 text-slate-400" />
+                            </div>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <div className="text-2xl font-bold font-heading">{formatCurrency(stats.outstandingAmount)}</div>
+                        <div className="flex items-baseline gap-2 mt-1">
+                            <div className="text-2xl font-bold text-slate-900 tracking-tight">{formatCurrency(stats.outstandingAmount)}</div>
                         </div>
-                        <p className="text-xs text-amber-600 mt-1 font-medium">
+                        <p className="text-[11px] text-amber-600 mt-2 font-medium">
                             {stats.overdueCount} invoices overdue
                         </p>
                     </CardContent>
                 </Card>
 
                 {/* Total Invoices */}
-                <Card className="hover:shadow-md transition-shadow duration-200">
+                <Card className="hover:shadow-subtle transition-all duration-300 border-none">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between space-y-0 pb-2">
-                            <p className="text-sm font-medium text-gray-500">Invoices</p>
-                            <FileText className="h-4 w-4 text-gray-400" />
+                        <div className="flex items-center justify-between pb-2">
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">Invoices</p>
+                            <div className="p-2 bg-slate-50 border border-slate-100 rounded-lg">
+                                <FileText className="h-4 w-4 text-slate-400" />
+                            </div>
                         </div>
-                        <div className="text-2xl font-bold font-heading">{formatNumber(stats.totalInvoices, 0)}</div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <div className="text-2xl font-bold text-slate-900 mt-1 tracking-tight">{formatNumber(stats.totalInvoices, 0)}</div>
+                        <p className="text-[11px] text-slate-400 mt-2 font-medium">
                             Issued this year
                         </p>
                     </CardContent>
                 </Card>
 
                 {/* Payments Received */}
-                <Card className="hover:shadow-md transition-shadow duration-200">
+                <Card className="hover:shadow-subtle transition-all duration-300 border-none">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between space-y-0 pb-2">
-                            <p className="text-sm font-medium text-gray-500">Payments</p>
-                            <Activity className="h-4 w-4 text-gray-400" />
+                        <div className="flex items-center justify-between pb-2">
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">Payments</p>
+                            <div className="p-2 bg-slate-50 border border-slate-100 rounded-lg">
+                                <Activity className="h-4 w-4 text-slate-400" />
+                            </div>
                         </div>
-                        <div className="text-2xl font-bold font-heading">{formatCurrency(stats.paymentsReceived)}</div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <div className="text-2xl font-bold text-slate-900 mt-1 tracking-tight">{formatCurrency(stats.paymentsReceived)}</div>
+                        <p className="text-[11px] text-slate-400 mt-2 font-medium">
                             Received this month
                         </p>
                     </CardContent>
                 </Card>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            {/* Financial Insights & Forecast */}
+            <div className="grid gap-6 md:grid-cols-2">
+                {insights && insights.length > 0 && (
+                     <InsightCard insights={insights} />
+                )}
+                {forecasts && (
+                     <CashFlowForecastCard forecasts={forecasts} />
+                )}
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                 {/* Revenue Chart */}
-                <Card className="col-span-4">
-                    <CardHeader>
-                        <CardTitle>Revenue Analytics</CardTitle>
+                <Card className="col-span-4 border-none shadow-sm">
+                    <CardHeader className="border-b border-slate-50">
+                        <CardTitle className="text-lg font-bold text-slate-900">Revenue Analytics</CardTitle>
                     </CardHeader>
-                    <CardContent className="pl-2">
+                    <CardContent className="p-6">
                         <div className="h-[350px] w-full">
                             {chartData && chartData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.1}/>
-                                            <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
                                         </linearGradient>
                                     </defs>
                                         <XAxis 
@@ -124,6 +141,7 @@ export default function Dashboard({ stats, recentInvoices, recentPayments, chart
                                             fontSize={12} 
                                             tickLine={false} 
                                             axisLine={false} 
+                                            dy={10}
                                         />
                                         <YAxis 
                                             stroke="#94a3b8" 
@@ -136,24 +154,24 @@ export default function Dashboard({ stats, recentInvoices, recentPayments, chart
                                         <Tooltip 
                                             contentStyle={{ 
                                                 backgroundColor: '#fff', 
-                                                border: '1px solid #e2e8f0', 
-                                                borderRadius: '8px',
-                                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' 
+                                                border: 'none', 
+                                                borderRadius: '12px',
+                                                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
                                             }}
                                             formatter={(value: number) => [formatCurrency(value), 'Revenue']}
                                         />
                                         <Area 
                                             type="monotone" 
                                             dataKey="revenue" 
-                                            stroke="#4f46e5" 
-                                            strokeWidth={2} 
+                                            stroke="#6366f1" 
+                                            strokeWidth={3} 
                                             fillOpacity={1} 
                                             fill="url(#colorRevenue)" 
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             ) : (
-                                <div className="flex h-full items-center justify-center text-gray-400">
+                                <div className="flex h-full items-center justify-center text-slate-400">
                                     No data available for chart
                                 </div>
                             )}
@@ -162,47 +180,47 @@ export default function Dashboard({ stats, recentInvoices, recentPayments, chart
                 </Card>
 
                 {/* Recent Activity */}
-                <Card className="col-span-3">
-                    <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
-                        <p className="text-sm text-gray-500">
+                <Card className="col-span-3 border-none shadow-sm">
+                    <CardHeader className="border-b border-slate-50">
+                        <CardTitle className="text-lg font-bold text-slate-900">Recent Activity</CardTitle>
+                        <p className="text-sm text-slate-500">
                             Latest invoices and payments
                         </p>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-6">
                         <div className="space-y-6">
                             {recentInvoices.slice(0, 3).map((invoice) => (
-                                <div key={`inv-${invoice.id}`} className="flex items-center">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 border border-slate-200">
-                                        <FileText className="h-4 w-4 text-slate-500" />
+                                <div key={`inv-${invoice.id}`} className="flex items-center group cursor-pointer">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-primary-50 group-hover:border-primary-100 transition-colors">
+                                        <FileText className="h-5 w-5 text-slate-400 group-hover:text-primary-600 transition-colors" />
                                     </div>
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none text-gray-900">
-                                            New Invoice {invoice.number}
+                                    <div className="ml-4 space-y-0.5">
+                                        <p className="text-sm font-bold text-slate-900">
+                                            Invoice {invoice.number}
                                         </p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-slate-500">
                                             {invoice.customer}
                                         </p>
                                     </div>
-                                    <div className="ml-auto font-medium text-sm text-gray-900">
+                                    <div className="ml-auto font-bold text-sm text-slate-900">
                                         +{formatCurrency(invoice.amount)}
                                     </div>
                                 </div>
                             ))}
                             {recentPayments.slice(0, 3).map((payment) => (
-                                <div key={`pay-${payment.id}`} className="flex items-center">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100">
-                                        <CreditCard className="h-4 w-4 text-emerald-600" />
+                                <div key={`pay-${payment.id}`} className="flex items-center group cursor-pointer">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100 group-hover:bg-emerald-100 transition-colors">
+                                        <CreditCard className="h-5 w-5 text-emerald-600" />
                                     </div>
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none text-gray-900">
+                                    <div className="ml-4 space-y-0.5">
+                                        <p className="text-sm font-bold text-slate-900">
                                             Payment Received
                                         </p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-slate-500">
                                             {payment.invoice}
                                         </p>
                                     </div>
-                                    <div className="ml-auto font-medium text-sm text-emerald-600">
+                                    <div className="ml-auto font-bold text-sm text-emerald-600">
                                         +{formatCurrency(payment.amount)}
                                     </div>
                                 </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class SettingController extends Controller
 {
@@ -13,12 +14,12 @@ class SettingController extends Controller
      */
     public function index()
     {
-        // Get the first setting or create default
+        // Get or create settings for current user
         $settings = Setting::firstOrCreate(
-            ['id' => 1],
+            ['user_id' => Auth::id()],
             [
                 'company_name' => 'My Company',
-                'email' => 'admin@example.com',
+                'email' => Auth::user()->email,
                 'primary_color' => '#3b82f6',
                 'currencies' => ['USD'],
                 'tax_rules' => []
@@ -47,13 +48,12 @@ class SettingController extends Controller
             'tax_rules' => 'nullable|array',
         ]);
         
-        $settings = Setting::firstOrFail();
+        $settings = Setting::where('user_id', Auth::id())->firstOrFail();
         
         // Use only validated data, excluding 'logo' (handled separately)
         $data = collect($validated)->except(['logo'])->toArray();
 
         if ($request->hasFile('logo')) {
-            // Delete old logo if exists? Optional.
             $path = $request->file('logo')->store('logos', 'public');
             $data['logo_path'] = '/storage/' . $path;
         }

@@ -39,7 +39,7 @@ interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {}
 
 export function CardHeader({ children, className, ...props }: CardHeaderProps) {
     return (
-        <div className={clsx('p-6', className)} {...props}>
+        <div className={clsx('px-6 py-5 border-b border-slate-100', className)} {...props}>
             {children}
         </div>
     );
@@ -49,7 +49,7 @@ interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
 
 export function CardTitle({ children, className, ...props }: CardTitleProps) {
     return (
-        <h3 className={clsx('text-lg font-heading font-semibold text-slate-900', className)} {...props}>
+        <h3 className={clsx('text-base font-semibold text-slate-900', className)} {...props}>
             {children}
         </h3>
     );
@@ -59,7 +59,7 @@ interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
 
 export function CardContent({ children, className, ...props }: CardContentProps) {
     return (
-        <div className={clsx('p-6 pt-0 text-slate-700', className)} {...props}>
+        <div className={clsx('p-6 text-slate-600', className)} {...props}>
             {children}
         </div>
     );

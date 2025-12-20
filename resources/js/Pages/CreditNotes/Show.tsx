@@ -2,13 +2,18 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, usePage } from '@inertiajs/react';
 import Card, { CardContent } from '@/Components/ui/Card';
 import Button from '@/Components/ui/Button';
-import StatusBadge from '@/Components/ui/StatusBadge';
-import { ArrowLeft, Printer, Edit2 } from 'lucide-react';
-import { CreditNote, Setting, PageProps } from '@/types/models';
+import Badge from '@/Components/ui/Badge';
+import PageHeader from '@/Components/ui/PageHeader';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/Table';
+import { ArrowLeft, Printer, Edit2, Building2, User2, Clock, CheckCircle2, FileText, Send, Calendar, Download, Activity } from 'lucide-react';
+import { CreditNote, Setting, PageProps, ActivityLog } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
+import ActivityFeed from '@/Components/ui/ActivityFeed';
+import { useEffect } from 'react';
+import clsx from 'clsx';
 
 interface ShowProps {
-    creditNote: CreditNote;
+    creditNote: CreditNote & { activity_logs?: ActivityLog[] };
 }
 
 interface InvoiceItem {
@@ -18,133 +23,277 @@ interface InvoiceItem {
 }
 
 export default function Show({ creditNote }: ShowProps) {
-    const { settings } = usePage<any>().props;
+    const { settings } = usePage<PageProps & { settings: Setting }>().props;
     const items = (typeof creditNote.items === 'string' ? JSON.parse(creditNote.items) : creditNote.items) as InvoiceItem[];
     const primaryColor = settings?.primary_color || '#3b82f6';
 
     const getStatusVariant = (status: string) => {
-        if (status === 'refunded') return 'success';
-        if (status === 'sent') return 'info';
-        return 'default';
+        switch (status) {
+            case 'refunded': return 'success';
+            case 'sent': return 'primary';
+            case 'draft': return 'secondary';
+            default: return 'soft';
+        }
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href={route('credit-notes.index')} className="text-slate-500 hover:text-slate-700 print:hidden">
-                            <ArrowLeft className="w-6 h-6" />
+        <AuthenticatedLayout>
+            <Head title={`Credit Note ${creditNote.number}`} />
+
+            <PageHeader 
+                title={
+                    <div className="flex items-center gap-3">
+                        <Link 
+                            href={route('credit-notes.index')}
+                            className="inline-flex items-center justify-center p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary-600 hover:border-primary-100 hover:bg-primary-50/50 transition-all shadow-sm group print:hidden"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
                         </Link>
-                        <h2 className="text-xl font-semibold leading-tight text-slate-800 font-heading">
-                            Credit Note {creditNote.number}
-                        </h2>
-                        <StatusBadge status={creditNote.status} className="ml-2" />
+                        <div className="flex items-center gap-3">
+                            <span className="font-heading font-black text-2xl tracking-tight text-slate-900">Credit Note</span>
+                            <span className="text-slate-400 font-mono text-xl">{creditNote.number}</span>
+                            <Badge variant={getStatusVariant(creditNote.status)} className="capitalize px-3 py-1 font-bold tracking-wide">
+                                {creditNote.status}
+                            </Badge>
+                        </div>
                     </div>
-                    <div className="flex gap-3 print:hidden">
-                         <Link href={route('credit-notes.edit', creditNote.id)}>
-                            <Button variant="secondary" icon={<Edit2 className="w-4 h-4" />}>
+                }
+                actions={
+                    <>
+                        <Button 
+                            variant="soft" 
+                            icon={<Printer className="w-4 h-4" />} 
+                            onClick={() => window.print()}
+                            className="bg-white border-slate-200"
+                        >
+                            Print
+                        </Button>
+                        <Link href={route('credit-notes.edit', creditNote.id)}>
+                            <Button variant="soft" icon={<Edit2 className="w-4 h-4" />} className="bg-white border-slate-200">
                                 Edit
                             </Button>
                         </Link>
-                        <Button variant="secondary" icon={<Printer className="w-4 h-4" />} onClick={() => window.print()}>
-                            Print
-                        </Button>
-                    </div>
-                </div>
-            }
-        >
-            <Head title={`CN ${creditNote.number}`} />
+                    </>
+                }
+            />
 
-            <div className="py-8 print:py-0">
-                <div className="mx-auto max-w-4xl sm:px-6 lg:px-8 print:max-w-none print:px-0">
-                    <Card className="print:shadow-none print:border-none">
-                        <CardContent className="p-8 space-y-8">
-                            {/* Header */}
-                            <div className="flex justify-between items-start border-b border-slate-100 pb-8">
-                                <div>
-                                    {settings?.logo_path ? (
-                                        <img src={settings.logo_path} alt="Company Logo" className="h-16 object-contain mb-4" />
-                                    ) : (
-                                        <h1 className="text-2xl font-bold text-slate-900" style={{ color: primaryColor }}>CREDIT NOTE</h1>
-                                    )}
-                                    <p className="text-slate-500 mt-1">#{creditNote.number}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-12">
+                {/* Main Credit Note Document */}
+                <div className="lg:col-span-12 xl:col-span-9 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <Card className="border-none shadow-premium-soft overflow-hidden print:shadow-none print:border-none uppercase-labels">
+                        {/* High-fidelity Header Branding */}
+                        <div className="h-2 w-full" style={{ backgroundColor: '#ef4444' }}></div>
+                        
+                        <CardContent className="p-8 md:p-12 space-y-12">
+                            <div className="flex flex-col md:flex-row justify-between items-start gap-8 border-b border-slate-100 pb-12">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-4">
+                                        <div 
+                                            className="w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg overflow-hidden shrink-0"
+                                            style={{ backgroundColor: '#ef4444' }}
+                                        >
+                                            {settings?.logo_path ? (
+                                                <img src={settings.logo_path} alt="CMS" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <FileText className="w-8 h-8" />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h1 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">{settings?.company_name || 'FINANCE-SAAS'}</h1>
+                                            <p className="text-red-500 font-mono text-xs font-black tracking-widest px-0.5 underline decoration-2 underline-offset-4">CREDIT ADJUSTMENT</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                            <Building2 className="w-4 h-4 text-slate-400" />
+                                            {settings?.company_name}
+                                        </p>
+                                        <p className="text-xs text-slate-500 max-w-xs leading-relaxed pl-6">
+                                            {settings?.address || 'Primary Business Registered Address'}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <h3 className="font-semibold text-slate-900">{settings?.company_name || 'My Company'}</h3>
-                                    {settings?.address && <p className="text-slate-500 text-sm whitespace-pre-line">{settings.address}</p>}
-                                    {settings?.email && <p className="text-slate-500 text-sm">{settings.email}</p>}
-                                    {settings?.phone && <p className="text-slate-500 text-sm">{settings.phone}</p>}
-                                </div>
-                            </div>
 
-                            {/* Details */}
-                            <div className="grid grid-cols-2 gap-8">
-                                <div>
-                                    <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Credit To</h4>
-                                    <p className="font-semibold text-slate-900">{creditNote.customer?.name}</p>
-                                    <p className="text-slate-600 text-sm">{creditNote.customer?.contact_info?.email}</p>
-                                    <p className="text-slate-600 text-sm">{creditNote.customer?.contact_info?.address}</p>
-                                </div>
-                                <div className="text-right">
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between md:justify-end md:gap-8">
-                                            <span className="text-slate-500">Date:</span>
-                                            <span className="font-medium text-slate-900">{formatDate(creditNote.date)}</span>
+                                <div className="text-right space-y-6">
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Document Ref</p>
+                                        <p className="text-3xl font-black text-slate-900 tracking-tighter font-mono">{creditNote.number}</p>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-end gap-2">
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Credit Date</span>
+                                            <span className="font-mono bg-slate-50 px-3 py-1 rounded-lg border border-slate-100 text-slate-700">{formatDate(creditNote.date)}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Items */}
-                            <div className="mt-8">
-                                <table className="w-full text-left">
-                                    <thead>
-                                        <tr className="border-b border-slate-200">
-                                            <th className="py-3 font-medium text-slate-500 text-sm" style={{ color: primaryColor }}>Description</th>
-                                            <th className="py-3 font-medium text-slate-500 text-sm text-right" style={{ color: primaryColor }}>Quantity</th>
-                                            <th className="py-3 font-medium text-slate-500 text-sm text-right" style={{ color: primaryColor }}>Price</th>
-                                            <th className="py-3 font-medium text-slate-500 text-sm text-right" style={{ color: primaryColor }}>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {items.map((item, index) => (
-                                            <tr key={index}>
-                                                <td className="py-4 text-slate-900">{item.description}</td>
-                                                <td className="py-4 text-slate-600 text-right">{item.quantity}</td>
-                                                <td className="py-4 text-slate-600 text-right">{formatCurrency(item.price)}</td>
-                                                <td className="py-4 font-medium text-slate-900 text-right">{formatCurrency(item.quantity * item.price)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                            {/* Recipient / Financial Profile */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                <div className="space-y-4">
+                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <User2 className="w-3.5 h-3.5" />
+                                        Adjusted Account
+                                    </h3>
+                                    <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100/50 space-y-3">
+                                        <p className="text-xl font-black text-slate-900 tracking-tight">{creditNote.customer?.name}</p>
+                                        <div className="space-y-1 text-sm text-slate-500 font-medium">
+                                            <p>{creditNote.customer?.contact_info?.email}</p>
+                                            <p className="leading-relaxed">{creditNote.customer?.contact_info?.address}</p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            {/* Totals */}
-                            <div className="border-t border-slate-100 pt-8 flex justify-end">
-                                <div className="w-64 space-y-3">
-                                    <div className="flex justify-between text-lg font-bold text-slate-900 border-t border-slate-200 pt-3" style={{ color: primaryColor }}>
-                                        <span>Total Credit</span>
-                                        <span>{formatCurrency(creditNote.amount)}</span>
+                                <div className="space-y-4 md:text-right">
+                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center justify-end gap-2">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        Balance Adjustment
+                                    </h3>
+                                    <div className="p-6 space-y-3">
+                                        <p className="text-3xl font-black text-red-600 tracking-tighter truncate">
+                                            -{formatCurrency(creditNote.amount)}
+                                        </p>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.15em]">
+                                            Total Credit Amount
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
-                             {/* Notes */}
-                             {creditNote.notes && (
-                                <div className="mt-8 pt-8 border-t border-slate-100">
-                                    <h4 className="text-sm font-medium text-slate-900 mb-2" style={{ color: primaryColor }}>Notes</h4>
-                                    <p className="text-slate-600 text-sm">{creditNote.notes}</p>
-                                </div>
-                            )}
+                            {/* Line Items Table */}
+                            <div className="pt-4 overflow-hidden rounded-2xl border border-slate-100">
+                                <Table>
+                                    <TableHeader className="bg-slate-50 border-b-2 border-slate-100">
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-800 py-6 pl-8">Adjustment Item</TableHead>
+                                            <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-800 text-right">Quantity</TableHead>
+                                            <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-800 text-right">Base Rate</TableHead>
+                                            <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-800 text-right pr-8">Total Credit</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {items.map((item, index) => (
+                                            <TableRow key={index} className="group border-slate-50 hover:bg-slate-50/50 transition-colors">
+                                                <TableCell className="py-6 pl-8">
+                                                    <p className="font-bold text-slate-900">{item.description}</p>
+                                                    <p className="text-xs text-slate-400 font-mono mt-0.5">Ref: #ADJ-{index + 201}</p>
+                                                </TableCell>
+                                                <TableCell className="py-6 text-right font-bold text-slate-600">{item.quantity}</TableCell>
+                                                <TableCell className="py-6 text-right font-mono text-slate-600">{formatCurrency(item.price)}</TableCell>
+                                                <TableCell className="py-6 text-right font-black text-red-600 pr-8 font-mono tracking-tight">
+                                                    -{formatCurrency(item.quantity * item.price)}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
 
-                             {/* Footer */}
-                             {settings?.bank_details && (
-                                <div className="mt-12 pt-8 border-t border-slate-100 text-sm text-slate-500 text-center whitespace-pre-line">
-                                    {settings.bank_details}
+                            {/* Totals Section */}
+                            <div className="flex flex-col md:flex-row justify-between gap-12 pt-8">
+                                <div className="flex-1 space-y-4">
+                                    <div className="p-6 rounded-2xl bg-red-50/30 border border-red-100/50 flex items-start gap-4 max-w-md">
+                                        <CheckCircle2 className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                                        <div className="space-y-1">
+                                            <p className="text-xs font-black text-red-900 uppercase tracking-widest">Document Integrity</p>
+                                            <p className="text-[10px] text-red-700 leading-relaxed font-semibold">
+                                                This credit note serves as a legal adjustment to previously issued billing. It identifies a reduction in the account balance.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    {creditNote.notes && (
+                                        <div className="space-y-2 max-w-md ml-1">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reason for Adjustment</p>
+                                            <p className="text-xs text-slate-500 leading-relaxed italic">{creditNote.notes}</p>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+
+                                <div className="w-full md:w-80 space-y-4">
+                                    <div className="px-6 space-y-3">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Gross Reduction</span>
+                                            <span className="font-mono font-black text-red-600">-{formatCurrency(creditNote.amount)}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-slate-900 p-8 rounded-3xl shadow-xl shadow-slate-200 relative overflow-hidden group">
+                                         <div className="absolute top-0 right-0 p-4 opacity-10">
+                                            <FileText className="w-20 h-20 text-white transform rotate-12" />
+                                        </div>
+                                        <div className="relative z-10 space-y-1">
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] block">TOTAL ADJUSTMENT</span>
+                                            <div className="flex items-baseline justify-between text-white">
+                                                <span className="text-3xl font-black font-mono tracking-tighter">
+                                                    {formatCurrency(creditNote.amount)}
+                                                </span>
+                                                <span className="text-xs font-black text-slate-500 italic uppercase">USD</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Bank Details & Terms */}
+                            <div className="pt-12 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-8 items-end opacity-60">
+                                <div className="space-y-3">
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Certification</p>
+                                        <p className="text-[9px] text-slate-500 leading-relaxed font-medium uppercase tracking-tighter">
+                                            Balance reversal documents are issued in accordance with standard accounting principles and tax regulations.
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">ID: {creditNote.id.toString().padStart(6, '0')}</span>
+                                        <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">COMPLIANT-LEDGER</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Authenticated By</p>
+                                    <p className="text-xs text-slate-900 font-bold uppercase italic tracking-tighter">
+                                        {settings?.company_name || 'FINANCE-SAAS GLOBAL LEDGER'}
+                                    </p>
+                                </div>
+                            </div>
                         </CardContent>
+                    </Card>
+                </div>
+
+                {/* Engagement Sidebar - Visual Polish */}
+                <div className="lg:col-span-12 xl:col-span-3 space-y-6 print:hidden">
+                    <Card className="border-none shadow-premium-soft overflow-hidden group">
+                        <div className="p-6 space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Adjustment Lifecycle</h3>
+                                <Activity className="w-4 h-4 text-slate-300" />
+                            </div>
+                            
+                            <ActivityFeed activities={creditNote.activity_logs || []} />
+
+                            <div className="space-y-3 pt-6 border-t border-slate-50">
+                                <Button variant="soft" fullWidth className="h-10 text-[10px] font-bold uppercase tracking-widest bg-white hover:bg-slate-50 border-slate-100">
+                                    <Send className="w-3.5 h-3.5 mr-2" />
+                                    Resend Notification
+                                </Button>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="border-none shadow-premium-soft overflow-hidden bg-slate-50/50">
+                        <div className="p-6 space-y-4">
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-slate-400" />
+                                <h3 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Processed</h3>
+                            </div>
+                            <p className="text-sm font-bold text-slate-900">Reconciled in Main Ledger</p>
+                            <div className="flex items-center gap-2 text-emerald-600">
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Verified</span>
+                            </div>
+                        </div>
                     </Card>
                 </div>
             </div>

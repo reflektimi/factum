@@ -2,10 +2,11 @@ import React, { ButtonHTMLAttributes } from 'react';
 import clsx from 'clsx';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'soft' | 'outline';
+    variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'warning' | 'soft' | 'outline';
     size?: 'sm' | 'md' | 'lg';
     loading?: boolean;
     icon?: React.ReactNode;
+    fullWidth?: boolean;
 }
 
 export default function Button({
@@ -13,26 +14,28 @@ export default function Button({
     size = 'md',
     loading = false,
     icon,
+    fullWidth = false,
     children,
     className,
     disabled,
     ...props
 }: ButtonProps) {
-    const baseClasses = 'font-medium rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2';
+    const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98] antialiased';
     
     const variantClasses = {
-        primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm hover:translate-y-[-1px] active:translate-y-[1px]',
-        secondary: 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:ring-slate-200 shadow-sm',
-        ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-200',
-        danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
-        soft: 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 focus:ring-indigo-200',
-        outline: 'bg-transparent border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 focus:ring-indigo-500',
+        primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-100 shadow-[0_1px_2px_rgba(0,0,0,0.1),0_0_0_1px_rgba(255,255,255,0.1)_inset]',
+        secondary: 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 focus:ring-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.05)]',
+        ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-100',
+        danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-100 shadow-sm',
+        warning: 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-100 shadow-sm',
+        soft: 'bg-primary-50 text-primary-700 hover:bg-primary-100 focus:ring-primary-50',
+        outline: 'bg-transparent border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-100',
     };
     
     const sizeClasses = {
-        sm: 'px-3 py-1.5 text-sm',
-        md: 'px-4 py-2 text-sm',
-        lg: 'px-6 py-3 text-base',
+        sm: 'h-8 px-3 text-xs rounded-md gap-1.5',
+        md: 'h-10 px-4 text-sm rounded-lg gap-2',
+        lg: 'h-12 px-6 text-base rounded-lg gap-2.5',
     };
     
     return (
@@ -41,19 +44,26 @@ export default function Button({
                 baseClasses,
                 variantClasses[variant],
                 sizeClasses[size],
-                (disabled || loading) && 'opacity-50 cursor-not-allowed',
+                fullWidth && "w-full flex",
                 className
             )}
             disabled={disabled || loading}
             {...props}
         >
             {loading && (
-                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
             )}
-            {icon && !loading && icon}
+            {icon && !loading && (
+                <span className={clsx(size === 'sm' ? 'w-4 h-4' : 'w-5 h-5', "flex items-center justify-center")}>
+                    {React.cloneElement(icon as React.ReactElement, { 
+                        size: size === 'sm' ? 16 : 18,
+                        strokeWidth: 2.5 
+                    })}
+                </span>
+            )}
             {children}
         </button>
     );

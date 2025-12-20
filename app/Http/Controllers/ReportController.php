@@ -17,6 +17,8 @@ class ReportController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Report::class);
+
         $reports = Report::with('generatedBy')->latest()->paginate(10);
         
         return Inertia::render('Reports', [
@@ -29,39 +31,43 @@ class ReportController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Report::class);
+
         $validated = $request->validate([
-            'type' => 'required|in:income,expenses,cash_flow,outstanding',
-            'title' => 'required|string',
+            'type' => 'required|in:profit_loss,balance_sheet,cash_flow',
+            'start_date' => 'required_if:type,profit_loss,cash_flow|date',
+            'end_date' => 'required_if:type,profit_loss,cash_flow|date|after_or_equal:start_date',
+            'as_of_date' => 'required_if:type,balance_sheet|date',
         ]);
+
+        $reportService = new \App\Services\ReportService(Auth::user());
         
-        $data = [];
-        
-        switch ($validated['type']) {
-            case 'income': // Treat as Profit & Loss
-                $data = $this->generateIncomeData();
-                break;
-            case 'outstanding':
-                $data = $this->generateOutstandingData();
-                break;
-            case 'cash_flow':
-                $data = $this->generateCashFlowData();
-                break;
-            case 'expenses':
-                $data = $this->generateExpenseReport();
-                break;
-            default:
-                $data = ['message' => 'Report type not implemented yet'];
+        try {
+            $report = match($validated['type']) {
+                'profit_loss' => $reportService->generateProfitAndLoss(
+                    \Carbon\Carbon::parse($validated['start_date']),
+                    \Carbon\Carbon::parse($validated['end_date'])
+                ),
+                'balance_sheet' => $reportService->generateBalanceSheet(
+                    \Carbon\Carbon::parse($validated['as_of_date'])
+                ),
+                'cash_flow' => $reportService->generateCashFlowStatement(
+                    \Carbon\Carbon::parse($validated['start_date']),
+                    \Carbon\Carbon::parse($validated['end_date'])
+                ),
+            };
+
+            return redirect()->route('reports.show', $report->id)
+                ->with('success', 'Report generated successfully.');
+                
+        } catch (\Exception $e) {
+            \Log::error('Report Generation Failed: ' . $e->getMessage(), [
+                'type' => $validated['type'],
+                'user_id' => Auth::id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to generate report: ' . $e->getMessage()]);
         }
-        
-        Report::create([
-            'title' => $validated['title'],
-            'type' => $validated['type'],
-            'data' => $data,
-            'generated_at' => now(),
-            'generated_by' => Auth::id(),
-        ]);
-        
-        return back()->with('success', 'Report generated successfully.');
     }
 
     /**
@@ -69,68 +75,47 @@ class ReportController extends Controller
      */
     public function show(Report $report)
     {
+        $this->authorize('view', $report);
+
         return Inertia::render('Reports/Show', [
-            'report' => $report->load('generatedBy'),
+            'report' => $report->load(['generatedBy', 'lineItems']),
         ]);
     }
 
-    // Helper methods for report generation
-    private function generateIncomeData()
+    /**
+     * Get drill-down transactions for a report line item
+     */
+    public function drillDown(Request $request, Report $report)
     {
-        $totalRevenue = Payment::where('status', 'completed')->sum('amount');
-        $totalExpenses = Expense::sum('amount');
-        
-        $monthlyRevenue = Payment::where('status', 'completed')
-            ->whereMonth('date', now()->month)
-            ->sum('amount');
-            
-        return [
-            'total_revenue' => $totalRevenue,
-            'total_expenses' => $totalExpenses,
-            'net_profit' => $totalRevenue - $totalExpenses,
-            'monthly_revenue' => $monthlyRevenue,
-            'generated_at' => now()->toDateTimeString(),
-        ];
-    }
-    
-    private function generateOutstandingData()
-    {
-        $outstanding = Invoice::whereNotIn('status', ['paid', 'draft'])->sum('total_amount');
-        $overdue = Invoice::where('status', 'overdue')->sum('total_amount');
-        $draft = Invoice::where('status', 'draft')->sum('total_amount');
-        
-        return [
-            'total_outstanding' => $outstanding,
-            'total_overdue' => $overdue,
-            'total_draft' => $draft,
-            'generated_at' => now()->toDateTimeString(),
-        ];
-    }
-    
-    private function generateCashFlowData()
-    {
-        $inflow = Payment::where('status', 'completed')->sum('amount');
-        $outflow = Expense::sum('amount');
-        
-        return [
-            'inflow' => $inflow,
-            'outflow' => $outflow,
-            'net' => $inflow - $outflow,
-            'generated_at' => now()->toDateTimeString(),
-        ];
+        $this->authorize('view', $report);
+
+        $validated = $request->validate([
+            'line_item_id' => 'required|exists:report_line_items,id',
+        ]);
+
+        $lineItem = \App\Models\ReportLineItem::findOrFail($validated['line_item_id']);
+
+        // Double check ownership via report_id (though findOrFail on scoped model already handles it)
+        if ($lineItem->report_id !== $report->id) {
+            abort(403);
+        }
+
+        $reportService = new \App\Services\ReportService(Auth::user());
+        $transactions = $reportService->getDrillDownTransactions($lineItem);
+
+        return response()->json([
+            'line_item' => $lineItem,
+            'transactions' => $transactions,
+        ]);
     }
 
-    private function generateExpenseReport()
+    /**
+     * Download the report as PDF (via browser print)
+     */
+    public function download(Report $report)
     {
-        // Expenses by Category
-        $byCategory = Expense::selectRaw('category, sum(amount) as total')
-            ->groupBy('category')
-            ->pluck('total', 'category');
+        $this->authorize('view', $report);
 
-        return [
-            'total_expenses' => Expense::sum('amount'),
-            'by_category' => $byCategory,
-            'generated_at' => now()->toDateTimeString(),
-        ];
+        return redirect()->route('reports.show', [$report->id, 'print' => true]);
     }
 }

@@ -3,10 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToUser;
 
 class Account extends Model
 {
+    use BelongsToUser;
+
     protected $fillable = [
+        'user_id',
         'name',
         'type',
         'contact_info',

@@ -55,6 +55,7 @@ export interface Payment {
     customer?: Account;
     amount: number;
     payment_method: string;
+    reference?: string | null;
     date: string;
     status: PaymentStatus;
     created_at: string;
@@ -64,11 +65,17 @@ export interface Payment {
 export interface Report {
     id: number;
     title: string;
-    type: ReportType;
+    type: string;
+    start_date?: string;
+    end_date?: string;
+    as_of_date?: string;
+    currency?: string;
+    parameters?: Record<string, any>;
     data: any;
     generated_at: string;
-    generated_by: number;
-    generated_by_user?: User;
+    generated_by: number | User;
+    generated_by_user?: User; // Keep for backward compatibility if needed, but primary is generated_by
+    line_items?: any[];
     created_at: string;
     updated_at: string;
 }
@@ -168,4 +175,18 @@ export interface PaginatedData<T> {
     last_page: number;
     per_page: number;
     total: number;
+}
+export interface ActivityLog {
+    id: number;
+    user_id: number;
+    user?: User;
+    loggable_type: string;
+    loggable_id: number;
+    event: string;
+    description: string | null;
+    properties: Record<string, any> | null;
+    ip_address: string | null;
+    user_agent: string | null;
+    created_at: string;
+    updated_at: string;
 }
