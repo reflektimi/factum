@@ -46,6 +46,7 @@ php artisan view:clear
 # Build frontend assets from project root
 cd /var/www
 echo "🛠️ Building frontend assets..."
+export NODE_OPTIONS=--max-old-space-size=2048
 npm run build
 
 # Check for Vite manifest
