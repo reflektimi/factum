@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: factum-app
+    runtime: docker
+    plan: free
+    branch: main
+    envVars:
+      - key: APP_NAME
+        value: Factum
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://factum-app.onrender.com
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+    startCommand: sh ./docker/startup.sh
+
+# Database managed externally via Neon
+# Set DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD manually in Render dashboard
