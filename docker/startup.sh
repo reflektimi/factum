@@ -1,7 +1,8 @@
 #!/bin/sh
 
 export DB_CONNECTION=pgsql
-export APP_URL=${APP_URL:-https://factum-api.onrender.com}
+export APP_ENV=production
+export APP_URL=${APP_URL:-https://finances-api-sgea.onrender.com}
 
 echo "🚀 Starting Factum API deployment..."
 
@@ -45,5 +46,5 @@ export LOG_LEVEL=debug
 
 echo "✅ Deployment complete! Starting API server..."
 
-# Start Laravel development server on port 8080 (Render default)
-php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+# Start Laravel development server on port 10000 (Render default)
+php artisan serve --host=0.0.0.0 --port=${PORT:-10000}

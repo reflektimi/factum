@@ -23,10 +23,10 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 
 Route::middleware('guest')->group(function () {
-    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login');
-    Route::post('/register', [RegisteredUserController::class, 'store'])->name('register');
-    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
-    Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('api.login');
+    Route::post('/register', [RegisteredUserController::class, 'store'])->name('api.register');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('api.password.email');
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('api.password.update');
 });
 
 Route::get('/user', function (Request $request) {
