@@ -1,4 +1,4 @@
-FROM php:8.4-apache
+FROM php:8.4-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -15,14 +15,6 @@ RUN apt-get update && apt-get install -y \
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
-
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
-
-# Configure Apache DocumentRoot to point to Laravel's public folder
-ENV APACHE_DOCUMENT_ROOT /var/www/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -44,7 +36,7 @@ RUN chown -R www-data:www-data /var/www \
 # Create storage link
 RUN php artisan storage:link || true
 
-EXPOSE 80
+EXPOSE 10000
 
 # Use the startup script
 CMD ["sh", "./docker/startup.sh"]

@@ -44,7 +44,7 @@ php artisan cache:clear
 export APP_DEBUG=true
 export LOG_LEVEL=debug
 
-echo "✅ Deployment complete! Starting Apache server..."
+echo "✅ Deployment complete! Starting API server..."
 
-# Start Apache in the foreground
-apache2-foreground
+# Start Laravel development server on port 10000 (Render default)
+php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
