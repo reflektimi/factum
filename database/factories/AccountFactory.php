@@ -16,12 +16,10 @@ class AccountFactory extends Factory
      */
     public function definition(): array
     {
-        $type = $this->faker->randomElement(['customer', 'supplier']);
-        
         return [
             'user_id' => \App\Models\User::factory(),
             'name' => $this->faker->company(),
-            'type' => $type,
+            'type' => 'customer', // Default to customer, use supplier() state method for suppliers
             'contact_info' => [
                 'email' => $this->faker->companyEmail(),
                 'phone' => $this->faker->phoneNumber(),
