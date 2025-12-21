@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export DB_CONNECTION=pgsql
-export APP_URL=https://factum-api.onrender.com
+export APP_URL=${APP_URL:-https://factum-api.onrender.com}
 
 echo "🚀 Starting Factum API deployment..."
 
@@ -24,6 +24,7 @@ if [ "$RUN_SEEDER" = "true" ]; then
     echo "🌱 Fresh migrate + seed (FIRST DEPLOY ONLY)"
     php artisan migrate:fresh --seed --force
 else
+    echo "📊 Running migrations..."
     php artisan migrate --force
 fi
 
@@ -37,6 +38,10 @@ php artisan storage:link
 # Clear all caches to ensure fresh start
 echo "🧹 Clearing caches..."
 php artisan cache:clear
+
+# Set debug mode for initial troubleshooting
+export APP_DEBUG=true
+export LOG_LEVEL=debug
 
 echo "✅ Deployment complete! Starting API server..."
 
