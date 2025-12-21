@@ -10,7 +10,7 @@ export default function Welcome() {
 
     return (
         <div className="min-h-screen bg-[#fafafa] selection:bg-primary-500 selection:text-white overflow-x-hidden font-sans">
-            <Head title="Welcome to Finances SaaS - Premium Financial Management" />
+            <Head title="Welcome to Factum - Premium Financial Management" />
 
             {/* Premium Navigation */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100 px-6 py-4">
@@ -19,7 +19,7 @@ export default function Welcome() {
                         <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-200">
                             <Building2 className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-xl font-black text-slate-900 tracking-tight uppercase">Finances<span className="text-primary-600">SaaS</span></span>
+                        <span className="text-xl font-black text-slate-900 tracking-tight">Factum</span>
                     </div>
 
                     <div className="flex items-center gap-6">
