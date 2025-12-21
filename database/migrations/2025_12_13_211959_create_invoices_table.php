@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('due_date');
             $table->json('items');
             $table->decimal('total_amount', 15, 2);
-            $table->enum('status', ['pending', 'paid', 'overdue'])->default('pending');
+            $table->enum('status', ['draft', 'sent', 'pending', 'paid', 'overdue'])->default('pending');
             $table->timestamps();
         });
     }
