@@ -23,7 +23,7 @@ echo "🗄️ Running database migrations..."
 
 if [ "$RUN_SEEDER" = "true" ]; then
     echo "🌱 Fresh migrate + seed (FIRST DEPLOY ONLY)"
-    php artisan migrate:fresh --seed --force
+php artisan migrate:fresh --seed --force
 else
     echo "📊 Running migrations..."
     php artisan migrate --force
@@ -44,7 +44,7 @@ php artisan cache:clear
 export APP_DEBUG=true
 export LOG_LEVEL=debug
 
-echo "✅ Deployment complete! Starting API server..."
+echo "✅ Deployment complete! Starting Apache server..."
 
-# Start Laravel development server on port 10000 (Render default)
-php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+# Start Apache in the foreground
+apache2-foreground
