@@ -47,4 +47,4 @@ export LOG_LEVEL=debug
 echo "✅ Deployment complete! Starting API server..."
 
 # Start Laravel development server on port 10000 (Render default)
-php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+php artisan serve --host=0.0.0.0 --port=$PORT
