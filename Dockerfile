@@ -16,12 +16,6 @@ RUN apt-get update && apt-get install -y \
 # Install PHP extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
 
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
-
-# Install TypeScript globally
-RUN npm install -g typescript
-
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -31,14 +25,8 @@ WORKDIR /var/www
 # Copy application files
 COPY . .
 
-
 # Install PHP dependencies (production)
 RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Install Node dependencies (including devDependencies) for build
-RUN npm ci
-
-
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www \

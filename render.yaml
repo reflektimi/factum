@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: factum-app
+    name: factum-api
     runtime: docker
     plan: free
     branch: main
@@ -10,7 +10,9 @@ services:
       - key: APP_KEY
         generateValue: true
       - key: APP_URL
-        value: https://factum-app.onrender.com
+        value: https://factum-api.onrender.com
+      - key: FRONTEND_URL
+        value: https://factum.vercel.app
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
@@ -32,12 +34,19 @@ services:
       - key: DB_PASSWORD
         sync: false
       - key: SESSION_DRIVER
-        value: database
+        value: file
+      - key: SESSION_SECURE_COOKIE
+        value: false
+      - key: SESSION_DOMAIN
+        value: ""
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: localhost:5173,factum.vercel.app
       - key: CACHE_DRIVER
-        value: database
+        value: file
       - key: QUEUE_CONNECTION
         value: database
     startCommand: sh ./docker/startup.sh
 
 # Database managed externally via Neon
 # Set DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD manually in Render dashboard
+# Update FRONTEND_URL after deploying to Vercel
