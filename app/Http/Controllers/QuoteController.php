@@ -36,7 +36,7 @@ class QuoteController extends Controller
             $query->where('status', $request->status);
         }
         
-        return Inertia::render('Quotes', [
+        return $this->render('Quotes', [
             'quotes' => $query->latest()->paginate(15),
             'filters' => $request->only(['search', 'status']),
         ]);
@@ -51,7 +51,7 @@ class QuoteController extends Controller
 
         $customers = Account::where('type', 'customer')->get();
         
-        return Inertia::render('Quotes/Create', [
+        return $this->render('Quotes/Create', [
             'customers' => $customers,
         ]);
     }
@@ -85,8 +85,7 @@ class QuoteController extends Controller
                 ]);
             }
             
-            return redirect()->route('quotes.show', $quote->id)
-                ->with('success', 'Quote created successfully.');
+            return $this->success('Quote created successfully.', ['quote' => $quote], 'quotes.show', [$quote->id]);
         });
     }
 
@@ -110,7 +109,7 @@ class QuoteController extends Controller
             ];
         });
 
-        return Inertia::render('Quotes/Show', [
+        return $this->render('Quotes/Show', [
             'quote' => $quote,
         ]);
     }
@@ -122,7 +121,7 @@ class QuoteController extends Controller
     {
         $this->authorize('update', $quote);
 
-        return Inertia::render('Quotes/Edit', [
+        return $this->render('Quotes/Edit', [
             'quote' => $quote,
             'customers' => Account::where('type', 'customer')->get(),
         ]);
@@ -139,7 +138,7 @@ class QuoteController extends Controller
         
         $quote->update($validated);
         
-        return redirect()->route('quotes.show', $quote->id)->with('success', 'Quote updated successfully.');
+        return $this->success('Quote updated successfully.', ['quote' => $quote], 'quotes.show', [$quote->id]);
     }
 
     /**
@@ -151,8 +150,7 @@ class QuoteController extends Controller
 
         $quote->delete();
         
-        return redirect()->route('quotes.index')
-            ->with('success', 'Quote deleted successfully.');
+        return $this->success('Quote deleted successfully.', [], 'quotes.index');
     }
 
     /**
@@ -195,8 +193,7 @@ class QuoteController extends Controller
             
             $quote->update(['status' => 'converted']);
             
-            return redirect()->route('invoices.show', $invoice->id)
-                ->with('success', 'Quote converted to Invoice successfully.');
+            return $this->success('Quote converted to Invoice successfully.', ['invoice' => $invoice], 'invoices.show', [$invoice->id]);
         });
     }
     /**
@@ -242,7 +239,7 @@ class QuoteController extends Controller
             ];
         });
 
-        return Inertia::render('Quotes/PublicShow', [
+        return $this->render('Quotes/PublicShow', [
             'quote' => $quote,
             'settings' => \App\Models\Setting::first(),
         ]);

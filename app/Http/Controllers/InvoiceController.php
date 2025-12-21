@@ -41,7 +41,7 @@ class InvoiceController extends Controller
         
         $invoices = $query->latest()->paginate(15);
         
-        return Inertia::render('Invoices', [
+        return $this->render('Invoices', [
             'invoices' => $invoices,
             'filters' => $request->only(['search', 'status']),
         ]);
@@ -56,7 +56,7 @@ class InvoiceController extends Controller
 
         $customers = Account::where('type', 'customer')->get();
         
-        return Inertia::render('Invoices/Create', [
+        return $this->render('Invoices/Create', [
             'customers' => $customers,
         ]);
     }
@@ -94,8 +94,7 @@ class InvoiceController extends Controller
                 ]);
             }
             
-            return redirect()->route('invoices.show', $invoice->id)
-                ->with('success', 'Invoice created successfully.');
+            return $this->success('Invoice created successfully.', ['invoice' => $invoice], 'invoices.show', [$invoice->id]);
         });
     }
 
@@ -119,7 +118,7 @@ class InvoiceController extends Controller
             ];
         });
 
-        return Inertia::render('Invoices/Show', [
+        return $this->render('Invoices/Show', [
             'invoice' => $invoice,
         ]);
     }
@@ -133,7 +132,7 @@ class InvoiceController extends Controller
 
         $customers = Account::where('type', 'customer')->get();
 
-        return Inertia::render('Invoices/Edit', [
+        return $this->render('Invoices/Edit', [
             'invoice' => $invoice,
             'customers' => $customers,
         ]);
@@ -150,7 +149,7 @@ class InvoiceController extends Controller
         
         $invoice->update($validated);
         
-        return redirect()->route('invoices.show', $invoice->id)->with('success', 'Invoice updated successfully.');
+        return $this->success('Invoice updated successfully.', ['invoice' => $invoice], 'invoices.show', [$invoice->id]);
     }
 
     /**
@@ -162,8 +161,7 @@ class InvoiceController extends Controller
 
         $invoice->delete();
         
-        return redirect()->route('invoices.index')
-            ->with('success', 'Invoice deleted successfully.');
+        return $this->success('Invoice deleted successfully.', [], 'invoices.index');
     }
     /**
      * Download the invoice as PDF (via browser print)
@@ -198,7 +196,7 @@ class InvoiceController extends Controller
         $invoice->load(['customer', 'lineItems']);
         $invoice->logActivity('viewed', 'Public URL accessed by recipient');
         
-        return Inertia::render('Invoices/PublicShow', [
+        return $this->render('Invoices/PublicShow', [
             'invoice' => $invoice,
             'settings' => \App\Models\Setting::first(),
         ]);

@@ -1,0 +1,76 @@
+import { type HTMLAttributes } from 'react';
+import clsx from 'clsx';
+
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+    padding?: 'none' | 'sm' | 'md' | 'lg';
+    hoverable?: boolean;
+}
+
+export default function Card({
+    padding = 'none',
+    hoverable = false,
+    children,
+    className,
+    ...props
+}: CardProps) {
+    const paddingClasses = {
+        none: '',
+        sm: 'p-4',
+        md: 'p-6',
+        lg: 'p-8',
+    };
+    
+    return (
+        <div
+            className={clsx(
+                'bg-white rounded-xl border border-slate-200 shadow-sm transition-all duration-200',
+                paddingClasses[padding],
+                hoverable && 'hover:shadow-md hover:-translate-y-0.5',
+                className
+            )}
+            {...props}
+        >
+            {children}
+        </div>
+    );
+}
+
+interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {}
+
+export function CardHeader({ children, className, ...props }: CardHeaderProps) {
+    return (
+        <div className={clsx('px-6 py-5 border-b border-slate-100', className)} {...props}>
+            {children}
+        </div>
+    );
+}
+
+interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
+
+export function CardTitle({ children, className, ...props }: CardTitleProps) {
+    return (
+        <h3 className={clsx('text-base font-semibold text-slate-900', className)} {...props}>
+            {children}
+        </h3>
+    );
+}
+
+interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
+
+export function CardContent({ children, className, ...props }: CardContentProps) {
+    return (
+        <div className={clsx('p-6 text-slate-600', className)} {...props}>
+            {children}
+        </div>
+    );
+}
+
+interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
+
+export function CardFooter({ children, className, ...props }: CardFooterProps) {
+    return (
+        <div className={clsx('p-6 flex items-center border-t border-slate-100 bg-slate-50/50 rounded-b-xl', className)} {...props}>
+            {children}
+        </div>
+    );
+}

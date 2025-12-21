@@ -1,0 +1,71 @@
+﻿src/Components/ApplicationLogo.tsx(1,10): error TS1484: 'SVGAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ApplicationLogoFull.tsx(1,10): error TS1484: 'SVGAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/Checkbox.tsx(1,10): error TS1484: 'InputHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/DangerButton.tsx(1,10): error TS1484: 'ButtonHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/InputError.tsx(1,10): error TS1484: 'HTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/InputLabel.tsx(1,10): error TS1484: 'LabelHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/InsightCard.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/Components/Layout/Sidebar.tsx(21,1): error TS6133: 'User' is declared but its value is never read.
+src/Components/Layout/TopHeader.tsx(3,1): error TS6133: 'User' is declared but its value is never read.
+src/Components/Modal.tsx(7,10): error TS1484: 'PropsWithChildren' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/NavLink.tsx(1,10): error TS1484: 'InertiaLinkProps' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/NavLink.tsx(20,13): error TS2322: Type 'React.ReactNode' is not assignable to type 'import("C:/Users/lotky/OneDrive/Desktop/Finances-Saas/node_modules/@types/react/index").ReactNode'.
+  Type 'bigint' is not assignable to type 'ReactNode'.
+src/Components/NotificationDropdown.tsx(2,54): error TS6133: 'AlertCircle' is declared but its value is never read.
+src/Components/NotificationDropdown.tsx(25,12): error TS6133: 'isOpen' is declared but its value is never read.
+src/Components/NotificationDropdown.tsx(25,20): error TS6133: 'setIsOpen' is declared but its value is never read.
+src/Components/PrimaryButton.tsx(1,10): error TS1484: 'ButtonHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ResponsiveNavLink.tsx(1,10): error TS1484: 'InertiaLinkProps' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ResponsiveNavLink.tsx(18,13): error TS2322: Type 'React.ReactNode' is not assignable to type 'import("C:/Users/lotky/OneDrive/Desktop/Finances-Saas/node_modules/@types/react/index").ReactNode'.
+  Type 'bigint' is not assignable to type 'ReactNode'.
+src/Components/SecondaryButton.tsx(1,10): error TS1484: 'ButtonHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/TextInput.tsx(3,5): error TS1484: 'InputHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/ActivityFeed.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/Components/ui/ActivityFeed.tsx(2,10): error TS1484: 'ActivityLog' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Badge.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/Components/ui/Badge.tsx(1,17): error TS1484: 'HTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Button.tsx(1,17): error TS1484: 'ButtonHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Button.tsx(62,25): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known properties, and 'size' does not exist in type 'Partial<unknown> & Attributes'.
+src/Components/ui/Card.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/Components/ui/Card.tsx(1,17): error TS1484: 'HTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/EngagementCard.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/Components/ui/EngagementCard.tsx(3,10): error TS6133: 'Calendar' is declared but its value is never read.
+src/Components/ui/EngagementCard.tsx(4,10): error TS1484: 'ActivityLog' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Input.tsx(1,17): error TS1484: 'InputHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Input.tsx(48,79): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known properties, and 'size' does not exist in type 'Partial<unknown> & Attributes'.
+src/Components/ui/Modal.tsx(1,20): error TS1484: 'ReactNode' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Modal.tsx(4,1): error TS6133: 'Button' is declared but its value is never read.
+src/Components/ui/Select.tsx(1,17): error TS1484: 'SelectHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/StatusBadge.tsx(1,10): error TS1484: 'HTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/StatusBadge.tsx(9,5): error TS6133: 'XCircle' is declared but its value is never read.
+src/Components/ui/StatusBadge.tsx(11,5): error TS6133: 'PauseCircle' is declared but its value is never read.
+src/Components/ui/Table.tsx(1,17): error TS1484: 'HTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Table.tsx(1,33): error TS1484: 'ThHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Table.tsx(1,51): error TS1484: 'TdHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Textarea.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/Components/ui/Textarea.tsx(1,17): error TS1484: 'TextareaHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Components/ui/Toolbar.tsx(2,1): error TS6192: All imports in import declaration are unused.
+src/lib/AuthRoutes.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/Pages/Accounts/Show.tsx(15,11): error TS6133: 'navigate' is declared but its value is never read.
+src/Pages/Auth/VerifyEmail.tsx(6,10): error TS6133: 'Link' is declared but its value is never read.
+src/Pages/Auth/VerifyEmail.tsx(21,19): error TS6133: 'response' is declared but its value is never read.
+src/Pages/CreditNotes.tsx(3,16): error TS6133: 'CardContent' is declared but its value is never read.
+src/Pages/CreditNotes/Edit.tsx(10,24): error TS6196: 'CreditNote' is declared but never used.
+src/Pages/CreditNotes/Show.tsx(48,11): error TS6133: 'primaryColor' is declared but its value is never read.
+src/Pages/Invoices/Edit.tsx(10,24): error TS6196: 'Invoice' is declared but never used.
+src/Pages/Invoices/PublicShow.tsx(1,16): error TS6133: 'Link' is declared but its value is never read.
+src/Pages/Invoices/PublicShow.tsx(6,29): error TS6133: 'Mail' is declared but its value is never read.
+src/Pages/Invoices/PublicShow.tsx(6,47): error TS6133: 'CheckCircle2' is declared but its value is never read.
+src/Pages/Invoices/PublicShow.tsx(7,10): error TS1484: 'Invoice' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Pages/Invoices/PublicShow.tsx(7,19): error TS1484: 'Setting' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/Pages/Payments/Edit.tsx(10,39): error TS6133: 'Activity' is declared but its value is never read.
+src/Pages/Payments/Show.tsx(16,11): error TS6133: 'navigate' is declared but its value is never read.
+src/Pages/Quotes/PublicShow.tsx(6,29): error TS6133: 'FileText' is declared but its value is never read.
+src/Pages/Quotes/Show.tsx(8,113): error TS6133: 'Calendar' is declared but its value is never read.
+src/Pages/Quotes/Show.tsx(27,11): error TS6133: 'navigate' is declared but its value is never read.
+src/Pages/Welcome.tsx(3,25): error TS2307: Cannot find module '@/hooks/useAuth' or its corresponding type declarations.
+src/types/models.ts(1,58): error TS6196: 'ReportType' is declared but never used.

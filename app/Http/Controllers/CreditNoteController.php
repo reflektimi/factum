@@ -41,7 +41,7 @@ class CreditNoteController extends Controller
 
         $creditNotes = $query->paginate(10)->withQueryString();
 
-        return Inertia::render('CreditNotes', [
+        return $this->render('CreditNotes', [
             'creditNotes' => $creditNotes,
             'filters' => $request->only(['search', 'status']),
         ]);
@@ -56,7 +56,7 @@ class CreditNoteController extends Controller
 
         $customers = Account::where('type', 'customer')->orderBy('name')->get();
         
-        return Inertia::render('CreditNotes/Create', [
+        return $this->render('CreditNotes/Create', [
             'customers' => $customers,
         ]);
     }
@@ -119,7 +119,7 @@ class CreditNoteController extends Controller
             ];
         });
 
-        return Inertia::render('CreditNotes/Show', [
+        return $this->render('CreditNotes/Show', [
             'creditNote' => $creditNote,
         ]);
     }
@@ -132,7 +132,7 @@ class CreditNoteController extends Controller
         $this->authorize('update', $creditNote);
 
         $customers = Account::where('type', 'customer')->orderBy('name')->get();
-        return Inertia::render('CreditNotes/Edit', [
+        return $this->render('CreditNotes/Edit', [
             'creditNote' => $creditNote,
             'customers' => $customers,
         ]);

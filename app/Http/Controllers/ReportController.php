@@ -21,7 +21,7 @@ class ReportController extends Controller
 
         $reports = Report::with('generatedBy')->latest()->paginate(10);
         
-        return Inertia::render('Reports', [
+        return $this->render('Reports', [
             'reports' => $reports,
         ]);
     }
@@ -77,7 +77,7 @@ class ReportController extends Controller
     {
         $this->authorize('view', $report);
 
-        return Inertia::render('Reports/Show', [
+        return $this->render('Reports/Show', [
             'report' => $report->load(['generatedBy', 'lineItems']),
         ]);
     }

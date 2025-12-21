@@ -24,7 +24,7 @@ class UserController extends Controller
 
         $users = $query->latest()->paginate(10);
 
-        return Inertia::render('Users', [
+        return $this->render('Users', [
             'users' => $users,
             'filters' => $request->only(['search']),
         ]);

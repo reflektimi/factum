@@ -30,7 +30,7 @@ class AccountController extends Controller
         
         $accounts = $query->latest()->paginate(15);
         
-        return Inertia::render('Accounts', [
+        return $this->render('Accounts', [
             'accounts' => $accounts,
             'filters' => $request->only(['search', 'type']),
         ]);
@@ -43,7 +43,7 @@ class AccountController extends Controller
     {
         $this->authorize('create', Account::class);
 
-        return Inertia::render('Accounts/Create');
+        return $this->render('Accounts/Create');
     }
 
     /**
@@ -65,8 +65,7 @@ class AccountController extends Controller
         
         $account = Account::create($validated);
         
-        return redirect()->route('accounts.show', $account->id)
-            ->with('success', 'Account created successfully.');
+        return $this->success('Account created successfully.', ['account' => $account], 'accounts.show', [$account->id]);
     }
 
     /**
@@ -76,7 +75,7 @@ class AccountController extends Controller
     {
         $this->authorize('view', $account);
 
-        return Inertia::render('Accounts/Show', [
+        return $this->render('Accounts/Show', [
             'account' => $account->load(['invoices', 'payments']),
         ]);
     }
@@ -88,7 +87,7 @@ class AccountController extends Controller
     {
         $this->authorize('update', $account);
 
-        return Inertia::render('Accounts/Edit', [
+        return $this->render('Accounts/Edit', [
             'account' => $account,
         ]);
     }
@@ -109,7 +108,7 @@ class AccountController extends Controller
         
         $account->update($validated);
         
-        return back()->with('success', 'Account updated successfully.');
+        return $this->success('Account updated successfully.', ['account' => $account]);
     }
 
     /**
@@ -121,7 +120,6 @@ class AccountController extends Controller
 
         $account->delete();
         
-        return redirect()->route('accounts.index')
-            ->with('success', 'Account deleted successfully.');
+        return $this->success('Account deleted successfully.', [], 'accounts.index');
     }
 }

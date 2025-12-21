@@ -40,7 +40,7 @@ class PaymentController extends Controller
         
         $payments = $query->latest()->paginate(15);
         
-        return Inertia::render('Payments', [
+        return $this->render('Payments', [
             'payments' => $payments,
             'filters' => $request->only(['search', 'status']),
         ]);
@@ -66,7 +66,7 @@ class PaymentController extends Controller
                 ];
             });
 
-        return Inertia::render('Payments/Create', [
+        return $this->render('Payments/Create', [
             'invoices' => $invoices,
         ]);
     }
@@ -102,7 +102,7 @@ class PaymentController extends Controller
             }
         }
         
-        return redirect()->route('payments.show', $payment->id)->with('success', 'Payment recorded successfully.');
+        return $this->success('Payment recorded successfully.', ['payment' => $payment], 'payments.show', [$payment->id]);
     }
 
     /**
@@ -115,7 +115,7 @@ class PaymentController extends Controller
         $payment->load(['invoice.customer', 'activityLogs.user']);
         $payment->logActivity('viewed');
 
-        return Inertia::render('Payments/Show', [
+        return $this->render('Payments/Show', [
             'payment' => $payment,
         ]);
     }
@@ -130,7 +130,7 @@ class PaymentController extends Controller
         $payment->load('invoice.customer');
         $payment->logActivity('viewed');
         
-        return Inertia::render('Payments/Edit', [
+        return $this->render('Payments/Edit', [
             'payment' => $payment,
         ]);
     }
@@ -161,7 +161,7 @@ class PaymentController extends Controller
             $invoice->update(['status' => 'pending']);
         }
         
-        return redirect()->route('payments.show', $payment->id)->with('success', 'Payment updated successfully.');
+        return $this->success('Payment updated successfully.', ['payment' => $payment], 'payments.show', [$payment->id]);
     }
 
     /**
@@ -173,6 +173,6 @@ class PaymentController extends Controller
 
         $payment->delete();
         
-        return back()->with('success', 'Payment deleted successfully.');
+        return $this->success('Payment deleted successfully.');
     }
 }

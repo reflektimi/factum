@@ -43,9 +43,6 @@ class ForecastController extends Controller
         }
     }
 
-    /**
-     * Refresh all data (both forecasts and insights)
-     */
     public function refreshAll(Request $request)
     {
         try {
@@ -58,8 +55,24 @@ class ForecastController extends Controller
             $insights = $insightsService->generateInsights();
             $insightsService->checkCashFlowWarnings();
             
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => sprintf('Dashboard refreshed! Generated 12-month forecast and %d insights.', count($insights)),
+                    'forecasts' => $forecasts,
+                    'insights' => $insights,
+                ]);
+            }
+            
             return back()->with('success', sprintf('Dashboard refreshed! Generated 12-month forecast and %d insights.', count($insights)));
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to refresh dashboard data: ' . $e->getMessage(),
+                ], 500);
+            }
+            
             return back()->with('error', 'Failed to refresh dashboard data: ' . $e->getMessage());
         }
    }

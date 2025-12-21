@@ -40,7 +40,7 @@ class RecurringInvoiceController extends Controller
  
         $recurringInvoices = $query->paginate(10)->withQueryString();
  
-        return Inertia::render('RecurringInvoices', [
+        return $this->render('RecurringInvoices', [
              'recurringInvoices' => $recurringInvoices,
              'filters' => $request->only(['search', 'status']),
          ]);
@@ -55,7 +55,7 @@ class RecurringInvoiceController extends Controller
  
          $customers = Account::where('type', 'customer')->orderBy('name')->get();
          
-         return Inertia::render('RecurringInvoices/Create', [
+         return $this->render('RecurringInvoices/Create', [
              'customers' => $customers,
          ]);
      }
@@ -123,7 +123,7 @@ class RecurringInvoiceController extends Controller
          });
  
          $customers = Account::where('type', 'customer')->orderBy('name')->get();
-         return Inertia::render('RecurringInvoices/Edit', [
+         return $this->render('RecurringInvoices/Edit', [
              'recurringInvoice' => $recurringInvoice,
              'customers' => $customers,
          ]);
@@ -148,7 +148,7 @@ class RecurringInvoiceController extends Controller
             ];
         });
 
-        return Inertia::render('RecurringInvoices/Show', [
+        return $this->render('RecurringInvoices/Show', [
             'recurringInvoice' => $recurringInvoice,
         ]);
     }

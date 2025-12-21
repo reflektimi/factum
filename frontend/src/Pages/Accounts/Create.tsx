@@ -1,0 +1,210 @@
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head } from '@/Components/InertiaShim';
+import { type FormEventHandler, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Card, { CardContent } from '@/Components/ui/Card';
+import Button from '@/Components/ui/Button';
+import Input from '@/Components/ui/Input';
+import Select from '@/Components/ui/Select';
+import PageHeader from '@/Components/ui/PageHeader';
+import { ArrowLeft, Save, Users, Mail, Phone, MapPin, DollarSign, Building2, Tag, ShieldCheck, Activity } from 'lucide-react';
+import api from '@/lib/api';
+
+export default function Create() {
+    const navigate = useNavigate();
+    const [data, setData] = useState({
+        name: '',
+        type: 'customer',
+        contact_info: {
+            email: '',
+            phone: '',
+            address: ''
+        },
+        balance: '0'
+    });
+    const [errors, setErrors] = useState<any>({});
+    const [processing, setProcessing] = useState(false);
+
+    const submit: FormEventHandler = async (e) => {
+        e.preventDefault();
+        setProcessing(true);
+        setErrors({});
+
+        try {
+            await api.post('/api/accounts', data);
+            navigate('/accounts');
+        } catch (error: any) {
+            if (error.response?.data?.errors) {
+                setErrors(error.response.data.errors);
+            } else {
+                console.error('Failed to create account:', error);
+            }
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    return (
+        <AuthenticatedLayout>
+            <Head title="Establish New Account - Administrative Entry" />
+
+            <PageHeader 
+                title={
+                    <div className="flex items-center gap-3">
+                        <Link 
+                            to="/accounts"
+                            className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm group"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </Link>
+                        <span>Register Account</span>
+                    </div>
+                }
+                subtitle="Initialize a new entity profile within the central management ledger"
+            />
+
+            <div className="mt-8 pb-20">
+                <form onSubmit={submit} className="grid grid-cols-12 gap-8">
+                    <div className="col-span-12 lg:col-span-8 space-y-8">
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 px-6 py-3">
+                                <Building2 className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Entity Foundation</span>
+                            </div>
+                            <CardContent className="p-6 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Input
+                                        label="Entity/Client Name"
+                                        placeholder="Full legal name of the entity..."
+                                        value={data.name}
+                                        onChange={(e) => setData({ ...data, name: e.target.value })}
+                                        error={errors.name}
+                                        icon={<Users className="w-4 h-4" />}
+                                        className="h-10"
+                                        required
+                                    />
+                                    <Select
+                                        label="Account Classification"
+                                        value={data.type}
+                                        onChange={(e) => setData({ ...data, type: e.target.value as any })}
+                                        error={errors.type}
+                                        icon={<Tag className="w-4 h-4" />}
+                                        className="h-10"
+                                    >
+                                        <option value="customer">Client / Customer</option>
+                                        <option value="supplier">Vendor / Supplier</option>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-6 pt-6 border-t border-slate-50">
+                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                        <Mail className="w-3.5 h-3.5" />
+                                        Communication Channels
+                                    </h4>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Input
+                                            type="email"
+                                            label="Digital Correspondence"
+                                            placeholder="primary@entity.com"
+                                            value={data.contact_info.email}
+                                            onChange={(e) => setData({ ...data, contact_info: { ...data.contact_info, email: e.target.value } })}
+                                            error={errors['contact_info.email']}
+                                            icon={<Mail className="w-4 h-4" />}
+                                            className="h-10"
+                                        />
+                                        <Input
+                                            type="tel"
+                                            label="Telephonic Link"
+                                            placeholder="+1 (555) 000-0000"
+                                            value={data.contact_info.phone}
+                                            onChange={(e) => setData({ ...data, contact_info: { ...data.contact_info, phone: e.target.value } })}
+                                            error={errors['contact_info.phone']}
+                                            icon={<Phone className="w-4 h-4" />}
+                                            className="h-10"
+                                        />
+                                    </div>
+                                    
+                                    <Input
+                                        label="Physical Jurisdiction"
+                                        placeholder="Principal place of business..."
+                                        value={data.contact_info.address}
+                                        onChange={(e) => setData({ ...data, contact_info: { ...data.contact_info, address: e.target.value } })}
+                                        error={errors['contact_info.address']}
+                                        icon={<MapPin className="w-4 h-4" />}
+                                        className="h-10"
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="border-none shadow-premium-soft overflow-hidden">
+                            <div className="p-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 px-6 py-3">
+                                <DollarSign className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fiscal Calibration</span>
+                            </div>
+                            <CardContent className="p-6">
+                                <div className="max-w-md">
+                                    <Input
+                                        type="number"
+                                        label="Initial Settlement Balance"
+                                        placeholder="0.00"
+                                        value={data.balance}
+                                        onChange={(e) => setData({ ...data, balance: e.target.value })}
+                                        error={errors.balance}
+                                        step="0.01"
+                                        icon={<DollarSign className="w-4 h-4" />}
+                                        className="h-10"
+                                    />
+                                    <p className="mt-3 text-[11px] text-slate-400 font-medium leading-relaxed">
+                                        Calibrate the ledger with an opening balance if this entity has existing outstanding transactions or credit within the internal system.
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <div className="col-span-12 lg:col-span-4 space-y-8">
+                        <Card className="border-none shadow-premium-soft overflow-hidden bg-slate-900 text-white">
+                            <CardContent className="p-6 space-y-6">
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profile Security</h4>
+                                    <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                                        Once indexed, this account will be available for association with invoices, payments, and fiscal reporting.
+                                    </p>
+                                </div>
+                                <div className="pt-6 border-t border-white/10 space-y-4">
+                                    <div className="flex items-center gap-3 text-xs font-medium text-slate-400">
+                                        <ShieldCheck className="w-4 h-4 text-emerald-400/80" />
+                                        Audit log encryption active
+                                    </div>
+                                    <div className="flex items-center gap-3 text-xs font-medium text-slate-400">
+                                        <Activity className="w-4 h-4 text-indigo-400/80" />
+                                        Real-time ledger sync
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <div className="flex flex-col gap-4">
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                loading={processing}
+                                className="w-full h-11 text-xs font-bold uppercase tracking-widest bg-slate-900 hover:bg-slate-800"
+                                icon={<Save className="w-4 h-4" />}
+                            >
+                                Index Account
+                            </Button>
+                            <Link to="/accounts" className="w-full">
+                                <Button variant="soft" type="button" className="w-full h-11 text-xs font-bold uppercase tracking-widest">
+                                    Discard Entry
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </AuthenticatedLayout>
+    );
+}

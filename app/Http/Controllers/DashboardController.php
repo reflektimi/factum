@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Stats
         $totalInvoices = Invoice::count();
@@ -121,7 +121,7 @@ class DashboardController extends Controller
                     ->get()
                     ->map(function ($f) {
                         return [
-                            'forecast_date' => $f->forecast_date->format('Y-m-d'),
+                            'forecast_date' => $f->forecast_date->toDateString(),
                             'projected_balance' => $f->projected_balance,
                             'total_inflow' => $f->total_inflow,
                             'total_outflow' => $f->total_outflow,
@@ -135,7 +135,7 @@ class DashboardController extends Controller
                     ->get()
                     ->map(function ($f) {
                         return [
-                            'forecast_date' => $f->forecast_date->format('Y-m-d'),
+                            'forecast_date' => $f->forecast_date->toDateString(),
                             'projected_balance' => $f->projected_balance,
                             'total_inflow' => $f->total_inflow,
                             'total_outflow' => $f->total_outflow,
@@ -149,7 +149,7 @@ class DashboardController extends Controller
                     ->get()
                     ->map(function ($f) {
                         return [
-                            'forecast_date' => $f->forecast_date->format('Y-m-d'),
+                            'forecast_date' => $f->forecast_date->toDateString(),
                             'projected_balance' => $f->projected_balance,
                             'total_inflow' => $f->total_inflow,
                             'total_outflow' => $f->total_outflow,
@@ -160,7 +160,7 @@ class DashboardController extends Controller
             ];
         }
 
-        return Inertia::render('Dashboard', [
+        $data = [
             'stats' => [
                 'totalInvoices' => $totalInvoices,
                 'totalRevenue' => $totalRevenue,
@@ -173,6 +173,8 @@ class DashboardController extends Controller
             'chartData' => $chartData,
             'insights' => $insights,
             'forecasts' => $forecastData,
-        ]);
+        ];
+
+        return $this->render('Dashboard', $data);
     }
 }

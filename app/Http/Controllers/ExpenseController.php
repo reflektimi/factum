@@ -29,7 +29,7 @@ class ExpenseController extends Controller
             $query->where('category', $request->category);
         }
         
-        return Inertia::render('Expenses', [
+        return $this->render('Expenses', [
             'expenses' => $query->latest()->paginate(15),
             'filters' => $request->only(['search', 'category']),
         ]);
@@ -42,7 +42,7 @@ class ExpenseController extends Controller
     {
         $this->authorize('create', Expense::class);
 
-        return Inertia::render('Expenses/Create');
+        return $this->render('Expenses/Create');
     }
 
     /**
@@ -86,7 +86,7 @@ class ExpenseController extends Controller
 
         $expense->load(['activityLogs.user']);
         $expense->logActivity('viewed');
-        return Inertia::render('Expenses/Show', [
+        return $this->render('Expenses/Show', [
             'expense' => $expense,
         ]);
     }
@@ -98,7 +98,7 @@ class ExpenseController extends Controller
     {
         $this->authorize('update', $expense);
 
-        return Inertia::render('Expenses/Edit', [
+        return $this->render('Expenses/Edit', [
             'expense' => $expense,
         ]);
     }
