@@ -18,17 +18,17 @@ class AccountFactory extends Factory
     {
         return [
             'user_id' => \App\Models\User::factory(),
-            'name' => fake()->company(),
+            'name' => \fake()->company(),
             'type' => 'customer', // Default to customer, use supplier() state method for suppliers
             'contact_info' => [
-                'email' => fake()->companyEmail(),
-                'phone' => fake()->phoneNumber(),
-                'address' => fake()->address(),
-                'website' => fake()->url(),
-                'vat_number' => fake()->regexify('[A-Z]{2}[0-9]{9}'),
+                'email' => \fake()->companyEmail(),
+                'phone' => \fake()->phoneNumber(),
+                'address' => \fake()->address(),
+                'website' => \fake()->url(),
+                'vat_number' => \fake()->regexify('[A-Z]{2}[0-9]{9}'),
             ],
             'balance' => 0,
-            'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            'created_at' => \fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => now(),
         ];
     }
