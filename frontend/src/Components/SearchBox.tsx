@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Loader2 } from 'lucide-react';
-import { Link } from '@inertiajs/react';
-import axios from 'axios';
+import { Link } from 'react-router-dom';
+import api from '@/lib/api';
 
 interface SearchResult {
     id: number;
@@ -45,7 +45,7 @@ export default function SearchBox() {
     const performSearch = async (searchQuery: string) => {
         setLoading(true);
         try {
-            const response = await axios.get(route('global.search'), {
+            const response = await api.get('/api/global-search', {
                 params: { query: searchQuery }
             });
             setResults(response.data);
@@ -84,7 +84,7 @@ export default function SearchBox() {
                         {results.map((result, index) => (
                             <Link
                                 key={`${result.type}-${result.id}-${index}`}
-                                href={result.url}
+                                to={result.url}
                                 className="block px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
                                 onClick={() => setShowResults(false)}
                             >
