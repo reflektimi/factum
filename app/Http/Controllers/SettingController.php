@@ -26,6 +26,11 @@ class SettingController extends Controller
             ]
         );
         
+        // Convert logo_path to full URL for cross-domain access
+        if ($settings->logo_path) {
+            $settings->logo_path = url($settings->logo_path);
+        }
+        
         return response()->json([
             'settings' => $settings,
         ]);
@@ -60,9 +65,15 @@ class SettingController extends Controller
 
         $settings->update($data);
         
+        // Refresh and convert logo_path to full URL
+        $settings = $settings->fresh();
+        if ($settings->logo_path) {
+            $settings->logo_path = url($settings->logo_path);
+        }
+        
         return response()->json([
             'message' => 'Settings updated successfully.',
-            'settings' => $settings->fresh(),
+            'settings' => $settings,
         ]);
     }
 }
