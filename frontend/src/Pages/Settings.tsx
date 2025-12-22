@@ -39,7 +39,7 @@ export default function Settings() {
                 address: data.address || '',
                 bank_details: data.bank_details || '',
                 primary_color: data.primary_color || '#3b82f6',
-                tax_rules: data.tax_rules || { name: '', rate: '' },
+                tax_rules: (data.tax_rules && data.tax_rules.name) ? data.tax_rules : { name: '', rate: '' },
                 logo: null,
             });
             setLogoPreview(data.logo_path);
@@ -81,11 +81,7 @@ export default function Settings() {
         }
 
         try {
-            await api.post('/api/settings', body, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            await api.post('/api/settings', body);
             fetchData();
         } catch (error: any) {
             if (error.response?.data?.errors) {
