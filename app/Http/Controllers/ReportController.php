@@ -57,8 +57,7 @@ class ReportController extends Controller
                 ),
             };
 
-            return redirect()->route('reports.show', $report->id)
-                ->with('success', 'Report generated successfully.');
+            return $this->success('Report generated successfully.', ['report' => $report], 'reports.show', [$report->id]);
                 
         } catch (\Exception $e) {
             \Log::error('Report Generation Failed: ' . $e->getMessage(), [

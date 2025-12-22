@@ -121,6 +121,7 @@ class CreditNoteController extends Controller
 
         return $this->render('CreditNotes/Show', [
             'creditNote' => $creditNote,
+            'settings' => \App\Models\Setting::where('user_id', $creditNote->user_id)->first(),
         ]);
     }
 

@@ -30,12 +30,17 @@ export default function Show() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [invoiceRes, settingsRes] = await Promise.all([
-                    api.get(`/api/invoices/${id}`),
-                    api.get('/api/settings')
-                ]);
-                setInvoice(invoiceRes.data.invoice);
-                setSettings(settingsRes.data);
+                // Fetch invoice (which now includes settings in the JSON response!)
+                const response = await api.get(`/api/invoices/${id}`);
+                setInvoice(response.data.invoice);
+                // The controller now sends 'settings' in the same response
+                if (response.data.settings) {
+                    setSettings(response.data.settings);
+                } else {
+                    // Fallback if settings not in response (though I added them)
+                    const settingsRes = await api.get('/api/settings');
+                    setSettings(settingsRes.data);
+                }
             } catch (error) {
                 console.error('Failed to fetch invoice details:', error);
             } finally {
@@ -46,17 +51,10 @@ export default function Show() {
         fetchData();
     }, [id]);
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('print') === 'true' && !loading) {
-            setTimeout(() => window.print(), 1000);
-        }
-    }, [loading]);
-
     if (loading || !invoice) {
         return (
             <AuthenticatedLayout>
-                <div className="flex h-[60vh] items-center justify-center">
+                 <div className="flex h-[60vh] items-center justify-center">
                     <div className="text-slate-500 animate-pulse font-medium">Loading invoice details...</div>
                 </div>
             </AuthenticatedLayout>

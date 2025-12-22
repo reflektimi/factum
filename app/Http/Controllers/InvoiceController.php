@@ -120,6 +120,7 @@ class InvoiceController extends Controller
 
         return $this->render('Invoices/Show', [
             'invoice' => $invoice,
+            'settings' => \App\Models\Setting::where('user_id', $invoice->user_id)->first(),
         ]);
     }
 

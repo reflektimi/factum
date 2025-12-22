@@ -10,8 +10,8 @@ import type { Quote, Setting, ActivityLog } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
 import ActivityFeed from '@/Components/ui/ActivityFeed';
 import EngagementCard from '@/Components/ui/EngagementCard';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmModal from '@/Components/ui/ConfirmModal';
 import api from '@/lib/api';
 
@@ -35,12 +35,9 @@ export default function Show() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [quoteRes, settingsRes] = await Promise.all([
-                    api.get(`/api/quotes/${id}`),
-                    api.get('/api/settings')
-                ]);
-                setQuote(quoteRes.data.quote);
-                setSettings(settingsRes.data);
+                const response = await api.get(`/api/quotes/${id}`);
+                setQuote(response.data.quote);
+                setSettings(response.data.settings || (await api.get('/api/settings')).data);
             } catch (error) {
                 console.error('Failed to fetch quote data:', error);
             } finally {

@@ -20,9 +20,10 @@ interface CashFlowForecastCardProps {
         conservative: ForecastData[];
         pessimistic: ForecastData[];
     };
+    className?: string;
 }
 
-export default function CashFlowForecastCard({ forecasts }: CashFlowForecastCardProps) {
+export default function CashFlowForecastCard({ forecasts, className }: CashFlowForecastCardProps) {
     if (!forecasts || !forecasts.conservative || forecasts.conservative.length === 0) {
         return (
             <Card className="border-none shadow-sm h-full">
@@ -68,7 +69,7 @@ export default function CashFlowForecastCard({ forecasts }: CashFlowForecastCard
     const isLowBalance = (finalConservative?.projected_balance ?? 0) < 10000 && (finalConservative?.projected_balance ?? 0) > 0;
 
     return (
-        <Card className="border-none shadow-sm h-full">
+        <Card className={`border-none shadow-sm h-full ${className || ''}`}>
             <CardHeader className="border-b border-slate-50">
                 <div className="flex items-center justify-between">
                     <div>

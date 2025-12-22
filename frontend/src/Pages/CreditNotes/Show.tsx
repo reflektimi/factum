@@ -9,8 +9,8 @@ import { ArrowLeft, Printer, Edit2, Building2, User2, Clock, CheckCircle2, FileT
 import type { CreditNote, Setting, ActivityLog } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
 import ActivityFeed from '@/Components/ui/ActivityFeed';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '@/lib/api';
 
 interface InvoiceItem {
@@ -28,12 +28,9 @@ export default function Show() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [noteRes, settingsRes] = await Promise.all([
-                    api.get(`/api/credit-notes/${id}`),
-                    api.get('/api/settings')
-                ]);
-                setCreditNote(noteRes.data.creditNote);
-                setSettings(settingsRes.data);
+                const response = await api.get(`/api/credit-notes/${id}`);
+                setCreditNote(response.data.creditNote);
+                setSettings(response.data.settings || (await api.get('/api/settings')).data);
             } catch (error) {
                 console.error('Failed to fetch credit note show data:', error);
             } finally {

@@ -150,6 +150,7 @@ class RecurringInvoiceController extends Controller
 
         return $this->render('RecurringInvoices/Show', [
             'recurringInvoice' => $recurringInvoice,
+            'settings' => \App\Models\Setting::where('user_id', $recurringInvoice->user_id)->first(),
         ]);
     }
  
