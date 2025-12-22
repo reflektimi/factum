@@ -229,6 +229,11 @@ class DatabaseSeeder extends Seeder
 
         // 12. Generate Insights based on the data
         $this->command->info('Generating financial insights...');
+        
+        // Run the specific insight seeder for guaranteed diversity
+        $this->call(FinancialInsightSeeder::class);
+
+        // Also run the dynamic service to catch any real anomalies from seeded data
         $service = new \App\Services\FinancialIntelligenceService($admin);
         $service->generateInsights();
         $service->checkCashFlowWarnings();
