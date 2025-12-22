@@ -25,6 +25,7 @@ export default function Settings() {
         bank_details: '',
         primary_color: '#3b82f6',
         tax_rules: { name: '', rate: '' },
+        currencies: ['USD'],
         logo: null as File | null,
     });
 
@@ -41,6 +42,7 @@ export default function Settings() {
                 bank_details: data.bank_details || '',
                 primary_color: data.primary_color || '#3b82f6',
                 tax_rules: (data.tax_rules && data.tax_rules.name) ? data.tax_rules : { name: '', rate: '' },
+                currencies: Array.isArray(data.currencies) && data.currencies.length > 0 ? data.currencies : ['USD'],
                 logo: null,
             });
             setLogoPreview(data.logo_path);
@@ -77,6 +79,10 @@ export default function Settings() {
         body.append('primary_color', formData.primary_color);
         body.append('tax_rules[name]', formData.tax_rules.name);
         body.append('tax_rules[rate]', formData.tax_rules.rate);
+        // Append currencies as array
+        if (formData.currencies && formData.currencies.length > 0) {
+            body.append('currencies[0]', formData.currencies[0]);
+        }
         if (formData.logo) {
             body.append('logo', formData.logo);
         }
@@ -265,6 +271,29 @@ export default function Settings() {
                                     Commit Changes
                                 </Button>
                             </CardFooter>
+                        </Card>
+                    </section>
+
+                    {/* Currency Setup */}
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 text-slate-900 font-bold px-1">
+                            <Building2 className="w-5 h-5 text-primary-600" />
+                            <h3>Currency Configuration</h3>
+                        </div>
+
+                        <Card className="border-none shadow-sm overflow-hidden">
+                            <CardContent className="p-6 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                                    <Input
+                                        label="Primary Currency Code"
+                                        value={formData.currencies[0] || 'USD'}
+                                        onChange={(e) => setFormData({ ...formData, currencies: [e.target.value.toUpperCase()] })}
+                                        placeholder="USD"
+                                        maxLength={3}
+                                    />
+                                    <p className="text-xs text-slate-500">Currently only single currency support is enabled for the dashboard. Multi-currency reporting coming soon.</p>
+                                </div>
+                            </CardContent>
                         </Card>
                     </section>
 
