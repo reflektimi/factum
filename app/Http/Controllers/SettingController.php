@@ -60,6 +60,9 @@ class SettingController extends Controller
 
         $settings->update($data);
         
-        return back()->with('success', 'Settings updated successfully.');
+        return response()->json([
+            'message' => 'Settings updated successfully.',
+            'settings' => $settings->fresh(),
+        ]);
     }
 }

@@ -10,8 +10,10 @@ import PageHeader from '@/Components/ui/PageHeader';
 import { Save, Upload, Building2, Palette, Info, MapPin, Mail, Phone, Loader2 } from 'lucide-react';
 import { type FormEventHandler, useState, useEffect } from 'react';
 import clsx from 'clsx';
+import { useToast } from '@/lib/ToastContext';
 
 export default function Settings() {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<any>({});
@@ -99,10 +101,14 @@ export default function Settings() {
                     // Do NOT set Content-Type manually
                 }
             });
+            showToast('Settings updated successfully!', 'success');
             fetchData();
         } catch (error: any) {
             if (error.response?.data?.errors) {
                 setErrors(error.response.data.errors);
+                showToast('Please fix the validation errors.', 'error');
+            } else {
+                showToast('Failed to update settings. Please try again.', 'error');
             }
         } finally {
             setProcessing(false);
