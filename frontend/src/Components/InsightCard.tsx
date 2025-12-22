@@ -17,9 +17,10 @@ interface Insight {
 
 interface InsightCardProps {
     insights: Insight[];
+    mode?: 'list' | 'grid';
 }
 
-export default function InsightCard({ insights }: InsightCardProps) {
+export default function InsightCard({ insights, mode = 'list' }: InsightCardProps) {
     const getSeverityStyles = (severity: string) => {
         switch (severity) {
             case 'critical':
@@ -78,6 +79,55 @@ export default function InsightCard({ insights }: InsightCardProps) {
         );
     }
 
+    if (mode === 'grid') {
+        return (
+            <div className="grid gap-4 sm:grid-cols-2">
+                {insights.map((insight) => (
+                    <Card key={insight.id} className={`border shadow-sm hover:shadow-md transition-all duration-300 ${getSeverityStyles(insight.severity)} border`}>
+                        <CardContent className="p-5 h-full flex flex-col">
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="p-2 bg-white/50 rounded-lg backdrop-blur-sm border border-black/5">
+                                    {getTypeIcon(insight.type, insight.severity)}
+                                </div>
+                                <Badge 
+                                    className="uppercase text-[10px] tracking-widest font-bold px-2 py-0.5"
+                                    variant={
+                                        insight.severity === 'critical' ? 'danger' :
+                                        insight.severity === 'high' ? 'warning' :
+                                        insight.severity === 'medium' ? 'primary' :
+                                        'secondary'
+                                    }
+                                >
+                                    {insight.severity}
+                                </Badge>
+                            </div>
+                            
+                            <h4 className="text-sm font-bold mb-2 line-clamp-2 min-h-[40px]">
+                                {insight.title}
+                            </h4>
+                            
+                            <p className="text-xs opacity-80 leading-relaxed mb-4 line-clamp-3">
+                                {insight.description}
+                            </p>
+
+                            <div className="mt-auto pt-3 border-t border-black/5 flex items-center justify-between">
+                                <span className="text-[10px] font-medium opacity-60">
+                                    {insight.detected_at}
+                                </span>
+                                {insight.impact_amount && insight.impact_amount > 0 && (
+                                    <span className="text-xs font-bold tabular-nums">
+                                        {formatCurrency(insight.impact_amount)}
+                                    </span>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        );
+    }
+
+    // List mode (legacy)
     return (
         <Card className="border-none shadow-sm h-full">
             <CardHeader className="border-b border-slate-50">

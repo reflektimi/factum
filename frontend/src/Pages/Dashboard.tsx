@@ -173,14 +173,36 @@ export default function Dashboard() {
                 </Card>
             </div>
 
-            {/* Financial Insights & Forecast */}
-            <div className="grid gap-6 md:grid-cols-2">
-                {insights && insights.length > 0 && (
-                     <InsightCard insights={insights} />
-                )}
-                {forecasts && (
-                     <CashFlowForecastCard forecasts={forecasts} />
-                )}
+            {/* Financial Sections */}
+            <div className="grid gap-6 md:grid-cols-12">
+                {/* Financial Insights - Takes 7/12 columns */}
+                <div className="md:col-span-7 space-y-6">
+                   {insights && insights.length > 0 ? (
+                        <div className="grid gap-4 sm:grid-cols-2">
+                             <div className="sm:col-span-2">
+                                <h3 className="text-lg font-bold text-slate-900 mb-4">Financial Insights</h3>
+                             </div>
+                             <InsightCard insights={insights} mode="grid" />
+                        </div>
+                   ) : (
+                        <Card className="h-full border-dashed border-2 bg-slate-50/50">
+                            <CardContent className="flex flex-col items-center justify-center p-6 h-full text-slate-400">
+                                <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
+                                <p>No insights generated yet</p>
+                            </CardContent>
+                        </Card>
+                   )}
+                </div>
+
+                {/* Cash Flow Forecast - Takes 5/12 columns */}
+                <div className="md:col-span-5">
+                    {forecasts && (
+                        <div className="h-full">
+                            <h3 className="text-lg font-bold text-slate-900 mb-4">Cash Flow Forecast</h3>
+                            <CashFlowForecastCard forecasts={forecasts} className="h-full" />
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">

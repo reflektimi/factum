@@ -43,12 +43,24 @@ class FinancialIntelligenceService
         $insights = array_merge($insights, $this->explainRevenueChanges());
         $insights = array_merge($insights, $this->explainExpenseChanges());
 
-        // Save to database
+        // Save to database (with deduplication)
         foreach ($insights as $insight) {
             if ($this->user) {
                 $insight['user_id'] = $this->user->id;
             }
-            FinancialInsight::create($insight);
+
+            // Check for existing active insight of same type/category/title today
+            $exists = FinancialInsight::where('user_id', $insight['user_id'] ?? null)
+                ->where('type', $insight['type'])
+                ->where('category', $insight['category'])
+                ->where('title', $insight['title'])
+                ->where('is_dismissed', false)
+                ->where('created_at', '>=', now()->subDay()) // Deduplicate daily
+                ->exists();
+
+            if (!$exists) {
+                FinancialInsight::create($insight);
+            }
         }
 
         return $insights;
