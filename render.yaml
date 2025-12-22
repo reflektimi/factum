@@ -1,7 +1,7 @@
 services:
   - type: web
     name: factum-api
-    runtime: docker
+    runtime: native
     plan: free
     branch: main
     envVars:
