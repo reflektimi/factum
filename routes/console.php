@@ -7,6 +7,9 @@ Schedule::command('backup:run')->daily()->at('03:00')->onFailure(function () {
     Log::error('Scheduled backup failed.');
 });
 
+// Run financial analysis every hour
+Schedule::command('insights:generate')->hourly();
+
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
