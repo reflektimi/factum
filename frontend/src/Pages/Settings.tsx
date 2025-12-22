@@ -1,4 +1,5 @@
 import api from '@/lib/api';
+import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@/Components/InertiaShim';
 import Card, { CardContent, CardFooter } from '@/Components/ui/Card';
@@ -80,8 +81,18 @@ export default function Settings() {
             body.append('logo', formData.logo);
         }
 
+import axios from 'axios'; // Ensure this is imported at top or used from existing import if available
+// ...
         try {
-            await api.post('/api/settings', body);
+            // Use raw axios to avoid global 'Content-Type: application/json' header from api instance
+            // forcing the browser to correctly set 'multipart/form-data; boundary=...'
+            await axios.post(`${import.meta.env.VITE_API_URL || ''}/api/settings`, body, {
+                withCredentials: true,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            });
             fetchData();
         } catch (error: any) {
             if (error.response?.data?.errors) {

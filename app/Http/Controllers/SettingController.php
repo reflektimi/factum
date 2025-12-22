@@ -43,7 +43,7 @@ class SettingController extends Controller
             'address' => 'nullable|string',
             'primary_color' => 'nullable|string',
             'bank_details' => 'nullable|string',
-            'logo' => 'nullable|image|max:2048',
+            'logo' => 'nullable|png|max:2048',
             'currencies' => 'nullable|array',
             'tax_rules' => 'nullable|array',
         ]);
