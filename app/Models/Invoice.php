@@ -9,6 +9,7 @@ use App\Traits\LogsActivity;
 use App\Models\DocumentLineItem;
 use App\Models\Payment;
 use App\Models\Account;
+use App\Models\RecurringInvoice;
 
 class Invoice extends Model
 {

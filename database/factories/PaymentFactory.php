@@ -29,6 +29,7 @@ class PaymentFactory extends Factory
             },
             'date' => $this->faker->dateTimeBetween('-1 month', 'now'),
             'payment_method' => $this->faker->randomElement(['Bank Transfer', 'Credit Card', 'PayPal', 'Cash']),
+            'reference_number' => 'REF-' . strtoupper($this->faker->bothify('??##?#??')),
             'status' => 'completed',
         ];
     }

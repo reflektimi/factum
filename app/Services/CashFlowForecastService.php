@@ -255,11 +255,15 @@ class CashFlowForecastService
     protected function calculateRecurringExpenses(Carbon $date, string $scenario): float
     {
         // Use last 3 months average for recurring expenses
-        $monthlyExpenses = $this->query(Expense::class)->where('date', '>=', now()->subMonths(3))
+        $expenses = $this->query(Expense::class)->where('date', '>=', now()->subMonths(3))
             ->whereIn('category', ['Software', 'Subscriptions', 'Rent', 'Utilities', 'Insurance'])
-            ->selectRaw('SUM(amount) as total')
-            ->groupBy(DB::raw("strftime('%Y-%m', date)"))
-            ->pluck('total');
+            ->get();
+
+        $monthlyExpenses = $expenses->groupBy(function($expense) {
+            return $expense->date->format('Y-m');
+        })->map(function($month) {
+            return $month->sum('amount');
+        });
         
         $monthly = $monthlyExpenses->avg() ?? 0;
         
