@@ -39,7 +39,7 @@ export default function Show() {
                     api.get(`/api/quotes/${id}`),
                     api.get('/api/settings')
                 ]);
-                setQuote(quoteRes.data);
+                setQuote(quoteRes.data.quote);
                 setSettings(settingsRes.data);
             } catch (error) {
                 console.error('Failed to fetch quote data:', error);

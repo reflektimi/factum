@@ -241,7 +241,7 @@ class QuoteController extends Controller
 
         return $this->render('Quotes/PublicShow', [
             'quote' => $quote,
-            'settings' => \App\Models\Setting::first(),
+            'settings' => \App\Models\Setting::where('user_id', $quote->user_id)->first(),
         ]);
     }
 }

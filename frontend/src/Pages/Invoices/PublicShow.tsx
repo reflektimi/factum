@@ -7,12 +7,9 @@ import { Printer, Download, CreditCard } from 'lucide-react';
 import type { Invoice, Setting } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
 
-interface PublicShowProps {
-    invoice: Invoice & { 
-        customer: { name: string; contact_info?: { email?: string; address?: string } };
-    };
-    settings: Setting;
-}
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import api from '@/lib/api';
 
 interface InvoiceItem {
     description: string;
@@ -21,7 +18,37 @@ interface InvoiceItem {
     total: number;
 }
 
-export default function PublicShow({ invoice, settings }: PublicShowProps) {
+export default function PublicShow() {
+    const { id } = useParams<{ id: string }>();
+    const [invoice, setInvoice] = useState<(Invoice & { customer: { name: string; contact_info?: { email?: string; address?: string } } }) | null>(null);
+    const [settings, setSettings] = useState<Setting | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await api.get(`/api/invoices/${id}/public`);
+                // The backend returns { invoice, settings } thanks to our render logic
+                setInvoice(response.data.invoice);
+                setSettings(response.data.settings);
+            } catch (error) {
+                console.error('Failed to fetch public invoice data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [id]);
+
+    if (loading || !invoice) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="text-slate-500 animate-pulse font-medium">Validating invoice reference...</div>
+            </div>
+        );
+    }
+
     const items = (Array.isArray(invoice.items) ? invoice.items : JSON.parse(invoice.items as unknown as string || '[]')) as InvoiceItem[];
     const primaryColor = settings?.primary_color || '#3b82f6';
 

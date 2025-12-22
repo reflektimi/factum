@@ -38,7 +38,7 @@ export default function Show() {
                     api.get(`/api/recurring-invoices/${id}`),
                     api.get('/api/settings')
                 ]);
-                setRecurringInvoice(profileRes.data);
+                setRecurringInvoice(profileRes.data.recurringInvoice);
                 setSettings(settingsRes.data);
             } catch (error) {
                 console.error('Failed to fetch profile details:', error);

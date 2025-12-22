@@ -198,7 +198,7 @@ class InvoiceController extends Controller
         
         return $this->render('Invoices/PublicShow', [
             'invoice' => $invoice,
-            'settings' => \App\Models\Setting::first(),
+            'settings' => \App\Models\Setting::where('user_id', $invoice->user_id)->first(),
         ]);
     }
 }

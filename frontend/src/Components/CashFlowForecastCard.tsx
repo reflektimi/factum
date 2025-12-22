@@ -46,26 +46,26 @@ export default function CashFlowForecastCard({ forecasts }: CashFlowForecastCard
     }
 
     // Transform data for chart
-    const chartData = forecasts.conservative.map((item, index) => {
+    const chartData = (forecasts.conservative || []).map((item, index) => {
         const date = new Date(item.forecast_date);
         const monthLabel = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
         
         return {
             month: monthLabel,
-            optimistic: forecasts.optimistic[index]?.projected_balance || 0,
-            conservative: item.projected_balance,
-            pessimistic: forecasts.pessimistic[index]?.projected_balance || 0,
+            optimistic: forecasts.optimistic?.[index]?.projected_balance ?? 0,
+            conservative: item.projected_balance ?? 0,
+            pessimistic: forecasts.pessimistic?.[index]?.projected_balance ?? 0,
         };
     });
 
-    // Get final balances
-    const finalOptimistic = forecasts.optimistic[forecasts.optimistic.length - 1];
-    const finalConservative = forecasts.conservative[forecasts.conservative.length - 1];
-    const finalPessimistic = forecasts.pessimistic[forecasts.pessimistic.length - 1];
+    // Get final balances safely
+    const finalOptimistic = forecasts.optimistic?.[forecasts.optimistic.length - 1] || { projected_balance: 0 };
+    const finalConservative = forecasts.conservative?.[forecasts.conservative.length - 1] || { projected_balance: 0 };
+    const finalPessimistic = forecasts.pessimistic?.[forecasts.pessimistic.length - 1] || { projected_balance: 0 };
 
     // Check for potential issues
-    const hasNegativeBalance = finalPessimistic.projected_balance < 0 || finalConservative.projected_balance < 0;
-    const isLowBalance = finalConservative.projected_balance < 10000 && finalConservative.projected_balance > 0;
+    const hasNegativeBalance = (finalPessimistic?.projected_balance ?? 0) < 0 || (finalConservative?.projected_balance ?? 0) < 0;
+    const isLowBalance = (finalConservative?.projected_balance ?? 0) < 10000 && (finalConservative?.projected_balance ?? 0) > 0;
 
     return (
         <Card className="border-none shadow-sm h-full">

@@ -10,6 +10,7 @@ import Invoices from './Pages/Invoices';
 import InvoiceCreate from './Pages/Invoices/Create';
 import InvoiceEdit from './Pages/Invoices/Edit';
 import InvoiceShow from './Pages/Invoices/Show';
+import InvoicePublic from './Pages/Invoices/PublicShow';
 
 // Accounts
 import Accounts from './Pages/Accounts';
@@ -62,6 +63,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Welcome />} />
         <Route path="/public/quotes/:id" element={<QuotePublic />} />
+        <Route path="/public/invoices/:id" element={<InvoicePublic />} />
 
         {/* Guest Routes */}
         <Route element={<GuestRoute />}>

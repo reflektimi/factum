@@ -29,6 +29,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('api.password.update');
 });
 
+// Public Document Views
+Route::get('invoices/{invoice}/public', [InvoiceController::class, 'publicView']);
+Route::get('quotes/{quote}/public', [QuoteController::class, 'publicView']);
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -46,7 +50,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('invoices', InvoiceController::class);
     Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download']);
     Route::post('invoices/{invoice}/resend', [InvoiceController::class, 'resend']);
-    Route::get('invoices/{invoice}/public', [InvoiceController::class, 'publicView']);
     
     Route::get('payments/create', [PaymentController::class, 'create']);
     Route::get('payments/{payment}/edit', [PaymentController::class, 'edit']);
@@ -62,7 +65,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('quotes/{quote}/download', [QuoteController::class, 'download']);
     Route::post('quotes/{quote}/convert', [QuoteController::class, 'convert']);
     Route::post('quotes/{quote}/resend', [QuoteController::class, 'resend']);
-    Route::get('quotes/{quote}/public', [QuoteController::class, 'publicView']);
     
     Route::get('credit-notes/create', [CreditNoteController::class, 'create']);
     Route::get('credit-notes/{credit_note}/edit', [CreditNoteController::class, 'edit']);

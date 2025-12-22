@@ -26,12 +26,10 @@ export default function PublicShow() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [quoteRes, settingsRes] = await Promise.all([
-                    api.get(`/api/quotes/${id}/public`),
-                    api.get('/api/settings')
-                ]);
-                setQuote(quoteRes.data);
-                setSettings(settingsRes.data);
+                const response = await api.get(`/api/quotes/${id}/public`);
+                // The backend returns { quote, settings } thanks to our render logic
+                setQuote(response.data.quote);
+                setSettings(response.data.settings);
             } catch (error) {
                 console.error('Failed to fetch public quote data:', error);
             } finally {
