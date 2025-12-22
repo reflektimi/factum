@@ -45,7 +45,18 @@ services:
         value: file
       - key: QUEUE_CONNECTION
         value: database
-    startCommand: sh ./docker/startup.sh
+      - key: OCTANE_SERVER
+        value: roadrunner
+    startCommand: >
+      composer install --no-dev --optimize-autoloader --ignore-platform-reqs &&
+      php artisan migrate --force &&
+      php artisan db:seed --force &&
+      php artisan config:cache &&
+      php artisan route:cache &&
+      php artisan view:cache &&
+      ./vendor/bin/rr get-binary --location /usr/local/bin/rr &&
+      chmod +x /usr/local/bin/rr &&
+      php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=10000
 
 # Database managed externally via Neon
 # Set DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD manually in Render dashboard
