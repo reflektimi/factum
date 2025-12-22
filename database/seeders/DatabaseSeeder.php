@@ -166,67 +166,6 @@ class DatabaseSeeder extends Seeder
             $customer->update(['balance' => $unpaid]);
         });
 
-        // 11. Create Anomalies for Financial Insights
-        $this->command->info('Creating financial anomalies...');
-
-        // 11a. Unusual Expense (> 3 std dev)
-        // Average expense is ~100-500. Create one big one.
-        Expense::factory()->create([
-            'user_id' => $admin->id,
-            'amount' => 5000.00, // Significant outlier
-            'category' => 'One-time Purchase',
-            'date' => now()->subDays(5),
-            'description' => 'Unexpected Server Hardware Replacement',
-        ]);
-
-        // 11b. Duplicate Payments
-        $dupInvoice = Invoice::factory()->create([
-            'user_id' => $admin->id,
-            'customer_id' => $regularCustomers->first()->id,
-            'status' => 'paid',
-            'total_amount' => 150.00,
-            'date' => now()->subDays(3),
-        ]);
-        
-        // Create two identical payments
-        Payment::factory()->count(2)->create([
-            'user_id' => $admin->id,
-            'invoice_id' => $dupInvoice->id,
-            'customer_id' => $dupInvoice->customer_id,
-            'amount' => 150.00,
-            'date' => now()->subDays(2),
-            'status' => 'completed',
-        ]);
-
-        // 11c. Payment Delays (Overdue Invoices)
-        Invoice::factory()->count(6)->create([
-            'user_id' => $admin->id,
-            'customer_id' => $regularCustomers->random()->id,
-            'status' => 'overdue',
-            'date' => now()->subMonths(2),
-            'due_date' => now()->subDays(45), // 45 days late
-        ]);
-
-        // 11d. Burn Rate (Increasing expenses over 3 months)
-        // Month -2: $1000
-        Expense::factory()->count(5)->create([
-            'user_id' => $admin->id,
-            'amount' => 200,
-            'date' => now()->subMonths(2)->startOfMonth()->addDays(5),
-        ]);
-        // Month -1: $1500
-        Expense::factory()->count(5)->create([
-            'user_id' => $admin->id,
-            'amount' => 300,
-            'date' => now()->subMonth()->startOfMonth()->addDays(5),
-        ]);
-        // Current Month: $2500
-        Expense::factory()->count(5)->create([
-            'user_id' => $admin->id,
-            'amount' => 500,
-            'date' => now()->startOfMonth()->addDays(5),
-        ]);
-
         // 12. Generate Insights based on the data
         $this->command->info('Generating financial insights...');
         
