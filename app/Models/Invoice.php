@@ -22,6 +22,7 @@ class Invoice extends Model
         'due_date',
         'total_amount',
         'status',
+        'recurring_invoice_id',
     ];
 
     protected $casts = [
@@ -57,5 +58,13 @@ class Invoice extends Model
     public function lineItems()
     {
         return $this->morphMany(DocumentLineItem::class, 'documentable');
+    }
+
+    /**
+     * Get the recurring invoice that generated this invoice
+     */
+    public function recurringInvoice()
+    {
+        return $this->belongsTo(RecurringInvoice::class);
     }
 }

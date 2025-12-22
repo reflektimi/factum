@@ -13,6 +13,7 @@ use App\Models\CreditNote;
 use App\Models\Setting;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -62,26 +63,26 @@ class DatabaseSeeder extends Seeder
         }
 
         // 2. Create Customers (Accounts)
-        // High Value: 3 customers
-        $highValueCustomers = Account::factory()->customer()->recycle($users)->count(3)->create(['name' => function() { return 'VIP - ' . fake()->company(); }]);
-        // Regular: 20 customers
-        $regularCustomers = Account::factory()->customer()->recycle($users)->count(20)->create();
+        // High Value: 2 customers
+        $highValueCustomers = Account::factory()->customer()->recycle($users)->count(2)->create(['name' => function() { return 'VIP - ' . fake()->company(); }]);
+        // Regular: 5 customers
+        $regularCustomers = Account::factory()->customer()->recycle($users)->count(5)->create();
         
         $allCustomers = $highValueCustomers->merge($regularCustomers);
 
         // 3. Create Suppliers (Accounts)
-        // 5 Suppliers
-        $suppliers = Account::factory()->supplier()->recycle($users)->count(5)->create();
+        // 2 Suppliers
+        $suppliers = Account::factory()->supplier()->recycle($users)->count(2)->create();
 
         // 5. Generate Invoices & History
         foreach ($allCustomers as $index => $customer) {
             // Determine invoice count based on customer tier
             if (str_contains($customer->name, 'VIP')) {
-                // VIPs get 5-10 invoices
-                $invoiceCount = rand(5, 10);
+                // VIPs get 3-5 invoices
+                $invoiceCount = rand(3, 5);
             } else {
-                // Regulars get 1-3 invoices
-                $invoiceCount = rand(1, 3);
+                // Regulars get 1-2 invoices
+                $invoiceCount = rand(1, 2);
             }
             
             Invoice::factory()
@@ -105,6 +106,7 @@ class DatabaseSeeder extends Seeder
                             'amount' => $invoice->total_amount,
                             'date' => fake()->dateTimeBetween($invoice->date, 'now'),
                             'status' => 'completed',
+                            'reference_number' => 'REF-' . strtoupper(Str::random(8)),
                         ]);
                     }
                     // 5b. Handle Partial Payments for some Sent invoices
@@ -116,33 +118,34 @@ class DatabaseSeeder extends Seeder
                             'amount' => $invoice->total_amount * 0.5,
                             'date' => fake()->dateTimeBetween($invoice->date, 'now'),
                             'status' => 'completed',
+                            'reference_number' => 'REF-' . strtoupper(Str::random(8)),
                         ]);
                     }
                 });
         }
 
         // 6. Create Expenses (For charts)
-        // Generate 50 expenses over last 6 months
-        Expense::factory()->count(50)->recycle($users)->create();
+        // Generate 15 expenses over last 6 months
+        Expense::factory()->count(15)->recycle($users)->create();
 
         // 7. Generate Quotes (Current & Converted)
         Quote::factory()
             ->recycle($users)
-            ->count(30)
+            ->count(10)
             ->recycle($allCustomers)
             ->create();
 
         // 8. Recurring Logic
         RecurringInvoice::factory()
             ->recycle($users)
-            ->count(15)
+            ->count(5)
             ->recycle($allCustomers)
             ->create();
 
         // 9. Credit Notes
         CreditNote::factory()
             ->recycle($users)
-            ->count(10)
+            ->count(5)
             ->recycle($allCustomers)
             ->create();
 
