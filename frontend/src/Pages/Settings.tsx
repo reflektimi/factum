@@ -90,7 +90,7 @@ export default function Settings() {
         try {
             // Use raw axios to avoid global 'Content-Type: application/json' header from api instance
             // forcing the browser to correctly set 'multipart/form-data; boundary=...'
-            await axios.post(`${import.meta.env.VITE_API_URL || ''}/api/settings`, body, {
+            await axios.post('/api/settings', body, {
                 withCredentials: true,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
