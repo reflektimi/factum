@@ -14,6 +14,9 @@ RUN docker-php-ext-install pdo_pgsql pcntl
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Configure PHP Upload Limits works "inside the app" for Docker
+COPY uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 # Set working directory
 WORKDIR /var/www/html
 
