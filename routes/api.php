@@ -83,8 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('reports/{report}/download', [ReportController::class, 'download']);
     
     // Settings & Users
-    Route::get('/settings', [SettingController::class, 'index']);
-    Route::post('/settings', [SettingController::class, 'update']);
+    // Route::get('/settings', [SettingController::class, 'index']); // Moved to web.php
+    // Route::post('/settings', [SettingController::class, 'update']); // Moved to web.php
     Route::get('/global-search', SearchController::class);
     
     // Notifications
