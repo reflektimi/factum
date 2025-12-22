@@ -13,7 +13,7 @@ import clsx from 'clsx';
 import { useToast } from '@/lib/ToastContext';
 
 export default function Settings() {
-    const { showToast } = useToast();
+    const { addToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<any>({});
@@ -101,14 +101,14 @@ export default function Settings() {
                     // Do NOT set Content-Type manually
                 }
             });
-            showToast('Settings updated successfully!', 'success');
+            addToast('Settings updated successfully!', 'success');
             fetchData();
         } catch (error: any) {
             if (error.response?.data?.errors) {
                 setErrors(error.response.data.errors);
-                showToast('Please fix the validation errors.', 'error');
+                addToast('Please fix the validation errors.', 'error');
             } else {
-                showToast('Failed to update settings. Please try again.', 'error');
+                addToast('Failed to update settings. Please try again.', 'error');
             }
         } finally {
             setProcessing(false);
