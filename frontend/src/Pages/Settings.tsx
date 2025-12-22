@@ -81,8 +81,6 @@ export default function Settings() {
             body.append('logo', formData.logo);
         }
 
-import axios from 'axios'; // Ensure this is imported at top or used from existing import if available
-// ...
         try {
             // Use raw axios to avoid global 'Content-Type: application/json' header from api instance
             // forcing the browser to correctly set 'multipart/form-data; boundary=...'
