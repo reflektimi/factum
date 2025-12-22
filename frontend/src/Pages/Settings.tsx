@@ -23,6 +23,7 @@ export default function Settings() {
         address: '',
         bank_details: '',
         primary_color: '#3b82f6',
+        tax_rules: { name: '', rate: '' },
         logo: null as File | null,
     });
 
@@ -38,6 +39,7 @@ export default function Settings() {
                 address: data.address || '',
                 bank_details: data.bank_details || '',
                 primary_color: data.primary_color || '#3b82f6',
+                tax_rules: data.tax_rules || { name: '', rate: '' },
                 logo: null,
             });
             setLogoPreview(data.logo_path);
@@ -72,6 +74,8 @@ export default function Settings() {
         body.append('address', formData.address);
         body.append('bank_details', formData.bank_details);
         body.append('primary_color', formData.primary_color);
+        body.append('tax_rules[name]', formData.tax_rules.name);
+        body.append('tax_rules[rate]', formData.tax_rules.rate);
         if (formData.logo) {
             body.append('logo', formData.logo);
         }
@@ -258,7 +262,35 @@ export default function Settings() {
                             </CardFooter>
                         </Card>
                     </section>
-                </form>
+
+                    {/* Tax Setup */}
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 text-slate-900 font-bold px-1">
+                            <Info className="w-5 h-5 text-primary-600" />
+                            <h3>Tax Configuration</h3>
+                        </div>
+
+                        <Card className="border-none shadow-sm overflow-hidden">
+                            <CardContent className="p-6 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Input
+                                        label="Tax Name (e.g. VAT, GST)"
+                                        value={formData.tax_rules?.name || ''}
+                                        onChange={(e) => setFormData({ ...formData, tax_rules: { ...formData.tax_rules, name: e.target.value } })}
+                                        placeholder="VAT"
+                                    />
+                                    <Input
+                                        label="Default Tax Rate (%)"
+                                        type="number"
+                                        value={formData.tax_rules?.rate || ''}
+                                        onChange={(e) => setFormData({ ...formData, tax_rules: { ...formData.tax_rules, rate: e.target.value } })}
+                                        placeholder="20"
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+                    </form>
             </div>
         </AuthenticatedLayout>
     );

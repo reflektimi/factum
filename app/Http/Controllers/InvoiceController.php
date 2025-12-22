@@ -82,14 +82,35 @@ class InvoiceController extends Controller
         return DB::transaction(function () use ($validated, $items) {
             $invoice = Invoice::create($validated);
             
+            // Get user settings for tax rules
+            $settings = \App\Models\Setting::where('user_id', Auth::id())->first();
+            $taxRate = 0;
+            if ($settings && !empty($settings->tax_rules) && isset($settings->tax_rules['rate'])) {
+                $taxRate = floatval($settings->tax_rules['rate']);
+            }
+
             foreach ($items as $index => $item) {
+                // Calculate tax
+                $quantity = $item['quantity'];
+                $price = $item['price'];
+                $subtotal = $quantity * $price;
+                
+                $taxAmount = 0;
+                if ($taxRate > 0) {
+                    $taxAmount = $subtotal * ($taxRate / 100);
+                }
+                
+                $total = $subtotal + $taxAmount;
+
                 $invoice->lineItems()->create([
                     'user_id' => Auth::id(),
                     'description' => $item['description'],
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['price'],
-                    'subtotal' => $item['quantity'] * $item['price'],
-                    'total' => $item['quantity'] * $item['price'], // Simplification: tax handled elsewhere or later
+                    'quantity' => $quantity,
+                    'unit_price' => $price,
+                    'subtotal' => $subtotal,
+                    'tax_rate' => $taxRate,
+                    'tax_amount' => $taxAmount,
+                    'total' => $total,
                     'sort_order' => $index,
                 ]);
             }

@@ -87,7 +87,7 @@ class DashboardController extends Controller
         $insights = \App\Models\FinancialInsight::active()
             ->orderBy('severity', 'desc') // Critical first
             ->orderBy('detected_at', 'desc')
-            ->take(5)
+            ->take(6)
             ->get()
             ->map(function ($insight) {
                 return [

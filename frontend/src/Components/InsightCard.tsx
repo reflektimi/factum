@@ -102,11 +102,11 @@ export default function InsightCard({ insights, mode = 'list' }: InsightCardProp
                                 </Badge>
                             </div>
                             
-                            <h4 className="text-sm font-bold mb-2 line-clamp-2 min-h-[40px]">
+                            <h4 className="text-sm font-bold mb-2 min-h-[40px]">
                                 {insight.title}
                             </h4>
                             
-                            <p className="text-xs opacity-80 leading-relaxed mb-4 line-clamp-3">
+                            <p className="text-xs opacity-80 leading-relaxed mb-4">
                                 {insight.description}
                             </p>
 
