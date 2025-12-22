@@ -178,8 +178,8 @@ export default function Dashboard() {
                 {/* Financial Insights - Takes 7/12 columns */}
                 <div className="md:col-span-7 space-y-6">
                    {insights && insights.length > 0 ? (
-                        <div className="grid gap-4 sm:grid-cols-2">
-                             <div className="sm:col-span-2">
+                        <div className="space-y-4">
+                             <div>
                                 <h3 className="text-lg font-bold text-slate-900 mb-4">Financial Insights</h3>
                              </div>
                              <InsightCard insights={insights} mode="grid" />

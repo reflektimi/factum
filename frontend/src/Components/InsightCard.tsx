@@ -81,7 +81,7 @@ export default function InsightCard({ insights, mode = 'list' }: InsightCardProp
 
     if (mode === 'grid') {
         return (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {insights.map((insight) => (
                     <Card key={insight.id} className={`border shadow-sm hover:shadow-md transition-all duration-300 ${getSeverityStyles(insight.severity)} border`}>
                         <CardContent className="p-5 h-full flex flex-col">
