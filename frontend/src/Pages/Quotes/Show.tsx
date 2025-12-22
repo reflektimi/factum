@@ -11,7 +11,7 @@ import { formatCurrency, formatDate } from '@/utils/format';
 import ActivityFeed from '@/Components/ui/ActivityFeed';
 import EngagementCard from '@/Components/ui/EngagementCard';
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import ConfirmModal from '@/Components/ui/ConfirmModal';
 import api from '@/lib/api';
 

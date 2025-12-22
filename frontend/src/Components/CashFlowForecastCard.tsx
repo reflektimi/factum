@@ -20,7 +20,7 @@ interface CashFlowForecastCardProps {
         conservative: ForecastData[];
         pessimistic: ForecastData[];
     };
-    className?: string;
+    className?: string; // Explicitly allowed
 }
 
 export default function CashFlowForecastCard({ forecasts, className }: CashFlowForecastCardProps) {

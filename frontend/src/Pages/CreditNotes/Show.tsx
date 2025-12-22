@@ -10,7 +10,7 @@ import type { CreditNote, Setting, ActivityLog } from '@/types/models';
 import { formatCurrency, formatDate } from '@/utils/format';
 import ActivityFeed from '@/Components/ui/ActivityFeed';
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import api from '@/lib/api';
 
 interface InvoiceItem {
