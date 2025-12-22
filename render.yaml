@@ -54,7 +54,9 @@ services:
       php artisan config:cache &&
       php artisan route:cache &&
       php artisan view:cache &&
-      php artisan serve --host=0.0.0.0 --port=10000
+      cp rr-linux rr &&
+      chmod +x rr &&
+      php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=10000
 
 # Database managed externally via Neon
 # Set DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD manually in Render dashboard
