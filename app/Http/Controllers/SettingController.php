@@ -26,7 +26,7 @@ class SettingController extends Controller
             ]
         );
         
-        return Inertia::render('Settings', [
+        return response()->json([
             'settings' => $settings,
         ]);
     }

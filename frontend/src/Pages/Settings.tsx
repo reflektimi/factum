@@ -1,63 +1,123 @@
+import api from '@/lib/api';
+import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@/Components/InertiaShim';
 import Card, { CardContent, CardFooter } from '@/Components/ui/Card';
 import Input from '@/Components/ui/Input';
 import Button from '@/Components/ui/Button';
 import Textarea from '@/Components/ui/Textarea';
 import PageHeader from '@/Components/ui/PageHeader';
-import { Save, Upload, Building2, Palette, Info, MapPin, Mail, Phone } from 'lucide-react';
+import { Save, Upload, Building2, Palette, Info, MapPin, Mail, Phone, Loader2 } from 'lucide-react';
 import { type FormEventHandler, useState, useEffect } from 'react';
 import clsx from 'clsx';
 
-interface SettingsProps {
-    settings: {
-        company_name: string;
-        email: string;
-        phone: string;
-        address: string;
-        bank_details: string;
-        primary_color: string;
-        tax_rules: { name: string; rate: string } | null;
-        currencies: string[] | null;
-        logo_path: string | null;
-    };
-    auth: any;
-}
+export default function Settings() {
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState<any>({});
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
-export default function Settings({ settings, auth }: SettingsProps) {
-    const { data, setData, post, processing, errors } = useForm({
-        company_name: settings.company_name || '',
-        email: settings.email || '',
-        phone: settings.phone || '',
-        address: settings.address || '',
-        bank_details: settings.bank_details || '',
-        primary_color: settings.primary_color || '#3b82f6',
-        tax_rules: (settings.tax_rules && settings.tax_rules.name) ? settings.tax_rules : { name: '', rate: '' },
-        currencies: Array.isArray(settings.currencies) && settings.currencies.length > 0 ? settings.currencies : ['USD'],
+    const [formData, setFormData] = useState({
+        company_name: '',
+        email: '',
+        phone: '',
+        address: '',
+        bank_details: '',
+        primary_color: '#3b82f6',
+        tax_rules: { name: '', rate: '' },
+        currencies: ['USD'],
         logo: null as File | null,
     });
 
-    const [logoPreview, setLogoPreview] = useState<string | null>(settings.logo_path);
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await api.get('/api/settings');
+            const data = response.data.settings || response.data; // Handle wrapped or unwrapped response
+            setFormData({
+                company_name: data.company_name || '',
+                email: data.email || '',
+                phone: data.phone || '',
+                address: data.address || '',
+                bank_details: data.bank_details || '',
+                primary_color: data.primary_color || '#3b82f6',
+                tax_rules: (data.tax_rules && data.tax_rules.name) ? data.tax_rules : { name: '', rate: '' },
+                currencies: Array.isArray(data.currencies) && data.currencies.length > 0 ? data.currencies : ['USD'],
+                logo: null,
+            });
+            setLogoPreview(data.logo_path);
+        } catch (error) {
+            console.error('Failed to fetch settings', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (data.logo) {
-            const objectUrl = URL.createObjectURL(data.logo);
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        if (formData.logo) {
+            const objectUrl = URL.createObjectURL(formData.logo);
             setLogoPreview(objectUrl);
             return () => URL.revokeObjectURL(objectUrl);
         }
-    }, [data.logo]);
+    }, [formData.logo]);
 
-    const handleSubmit: FormEventHandler = (e) => {
+    const handleSubmit: FormEventHandler = async (e) => {
         e.preventDefault();
-        // Native Inertia form submission handles FormData conversion automatically
-        post('/settings', {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () => {
-                // Optional: show toast
-            },
-        });
+        setProcessing(true);
+        setErrors({});
+
+        const body = new FormData();
+        body.append('company_name', formData.company_name);
+        body.append('email', formData.email);
+        body.append('phone', formData.phone);
+        body.append('address', formData.address);
+        body.append('bank_details', formData.bank_details);
+        body.append('primary_color', formData.primary_color);
+        body.append('tax_rules[name]', formData.tax_rules.name);
+        body.append('tax_rules[rate]', formData.tax_rules.rate);
+        
+        // Append currencies
+        if (formData.currencies && formData.currencies.length > 0) {
+            body.append('currencies[0]', formData.currencies[0]);
+        }
+
+        if (formData.logo) {
+            body.append('logo', formData.logo);
+        }
+
+        try {
+            // Use raw axios to prevent global header interference with boundary
+            await axios.post('/api/settings', body, {
+                withCredentials: true,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    // Do NOT set Content-Type manually
+                }
+            });
+            fetchData();
+        } catch (error: any) {
+            if (error.response?.data?.errors) {
+                setErrors(error.response.data.errors);
+            }
+        } finally {
+            setProcessing(false);
+        }
     };
+
+    if (loading) {
+        return (
+            <AuthenticatedLayout>
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+                </div>
+            </AuthenticatedLayout>
+        );
+    }
 
     return (
         <AuthenticatedLayout>
@@ -101,16 +161,16 @@ export default function Settings({ settings, auth }: SettingsProps) {
                                                 <label className="flex flex-col items-center justify-center h-24 w-full px-4 py-4 bg-white rounded-2xl border-2 border-dashed border-slate-200 cursor-pointer hover:border-primary-400 hover:bg-primary-50/30 transition-all group">
                                                     <Upload className="w-6 h-6 text-slate-400 mb-2 group-hover:text-primary-500 group-hover:scale-110 transition-all" />
                                                     <span className="text-xs font-bold text-slate-500 group-hover:text-primary-700 leading-tight text-center">
-                                                        {data.logo ? data.logo.name : 'Click to upload PNG or SVG'}
+                                                        {formData.logo ? formData.logo.name : 'Click to upload PNG or SVG'}
                                                     </span>
                                                     <input 
                                                         type='file' 
                                                         className="hidden" 
                                                         accept="image/*"
-                                                        onChange={(e) => setData('logo', e.target.files ? e.target.files[0] : null)}
+                                                        onChange={(e) => setFormData({ ...formData, logo: e.target.files ? e.target.files[0] : null })}
                                                     />
                                                 </label>
-                                                <p className="text-[10px] text-slate-400 font-medium">Recommended: 400x400px, max 2MB.</p>
+                                                <p className="text-[10px] text-slate-400 font-medium">Recommended: 400x400px, max 5MB.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -125,14 +185,14 @@ export default function Settings({ settings, auth }: SettingsProps) {
                                             <div className="relative group">
                                                 <input 
                                                     type="color" 
-                                                    value={data.primary_color}
-                                                    onChange={(e) => setData('primary_color', e.target.value)}
+                                                    value={formData.primary_color}
+                                                    onChange={(e) => setFormData({ ...formData, primary_color: e.target.value })}
                                                     className="h-14 w-14 rounded-xl border-4 border-white shadow-md cursor-pointer appearance-none bg-transparent overflow-hidden"
                                                 />
                                                 <div className="absolute inset-0 rounded-xl pointer-events-none ring-1 ring-slate-200 group-hover:ring-primary-400 transition-all"></div>
                                             </div>
                                             <div className="flex-1">
-                                                <div className="text-sm font-mono font-bold text-slate-900 uppercase tracking-wider">{data.primary_color}</div>
+                                                <div className="text-sm font-mono font-bold text-slate-900 uppercase tracking-wider">{formData.primary_color}</div>
                                                 <p className="text-[10px] text-slate-500 font-medium mt-1 leading-relaxed">
                                                     This color will be applied to buttons and invoice highlights.
                                                 </p>
@@ -155,8 +215,8 @@ export default function Settings({ settings, auth }: SettingsProps) {
                             <CardContent className="p-6 space-y-6">
                                 <Input
                                     label="Official Business Name"
-                                    value={data.company_name}
-                                    onChange={(e) => setData('company_name', e.target.value)}
+                                    value={formData.company_name}
+                                    onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
                                     error={errors.company_name}
                                     icon={<Building2 className="w-4 h-4" />}
                                     placeholder="e.g. Acme Financial Services Ltd."
@@ -167,8 +227,8 @@ export default function Settings({ settings, auth }: SettingsProps) {
                                     <Input
                                         label="Corporate Email"
                                         type="email"
-                                        value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         error={errors.email}
                                         icon={<Mail className="w-4 h-4" />}
                                         placeholder="billing@acme.com"
@@ -176,8 +236,8 @@ export default function Settings({ settings, auth }: SettingsProps) {
                                     />
                                     <Input
                                         label="Business Phone"
-                                        value={data.phone}
-                                        onChange={(e) => setData('phone', e.target.value)}
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         error={errors.phone}
                                         icon={<Phone className="w-4 h-4" />}
                                         placeholder="+1 (555) 000-0000"
@@ -186,8 +246,8 @@ export default function Settings({ settings, auth }: SettingsProps) {
 
                                 <Input
                                     label="Registered Office Address"
-                                    value={data.address}
-                                    onChange={(e) => setData('address', e.target.value)}
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                     error={errors.address}
                                     icon={<MapPin className="w-4 h-4" />}
                                     placeholder="123 Finance Plaza, Suite 100, Capital City"
@@ -195,8 +255,8 @@ export default function Settings({ settings, auth }: SettingsProps) {
                                 
                                 <Textarea
                                     label="Bank Details & Invoice Footer"
-                                    value={data.bank_details}
-                                    onChange={(e) => setData('bank_details', e.target.value)}
+                                    value={formData.bank_details}
+                                    onChange={(e) => setFormData({ ...formData, bank_details: e.target.value })}
                                     error={errors.bank_details}
                                     placeholder="IBAN: DE12..., SWIFT: ..., VAT ID: ..., Registered at Capital Court..."
                                     className="min-h-[120px]"
@@ -217,8 +277,8 @@ export default function Settings({ settings, auth }: SettingsProps) {
                                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                                     <Input
                                         label="Primary Currency Code"
-                                        value={data.currencies ? data.currencies[0] : 'USD'}
-                                        onChange={(e) => setData('currencies', [e.target.value.toUpperCase()])}
+                                        value={formData.currencies ? formData.currencies[0] : 'USD'}
+                                        onChange={(e) => setFormData({ ...formData, currencies: [e.target.value.toUpperCase()] })}
                                         placeholder="USD"
                                         maxLength={3}
                                     />
@@ -240,15 +300,15 @@ export default function Settings({ settings, auth }: SettingsProps) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <Input
                                         label="Tax Name (e.g. VAT, GST)"
-                                        value={data.tax_rules?.name || ''}
-                                        onChange={(e) => setData('tax_rules', { ...data.tax_rules, name: e.target.value, rate: data.tax_rules?.rate || '' })}
+                                        value={formData.tax_rules?.name || ''}
+                                        onChange={(e) => setFormData({ ...formData, tax_rules: { ...formData.tax_rules, name: e.target.value, rate: formData.tax_rules?.rate || '' } })}
                                         placeholder="VAT"
                                     />
                                     <Input
                                         label="Default Tax Rate (%)"
                                         type="number"
-                                        value={data.tax_rules?.rate || ''}
-                                        onChange={(e) => setData('tax_rules', { ...data.tax_rules, name: data.tax_rules?.name || '', rate: e.target.value })}
+                                        value={formData.tax_rules?.rate || ''}
+                                        onChange={(e) => setFormData({ ...formData, tax_rules: { ...formData.tax_rules, name: formData.tax_rules?.name || '', rate: e.target.value } })}
                                         placeholder="20"
                                     />
                                 </div>
