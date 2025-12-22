@@ -58,6 +58,30 @@ services:
       chmod +x rr &&
       php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=10000
 
+  - type: cron
+    name: factum-scheduler
+    runtime: native
+    plan: free
+    schedule: "* * * * *"
+    envVars:
+      - key: APP_NAME
+        value: Factum
+      - key: APP_ENV
+        value: production
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+    startCommand: php artisan schedule:run
+
 # Database managed externally via Neon
 # Set DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD manually in Render dashboard
 # Update FRONTEND_URL after deploying to Vercel
