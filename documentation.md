@@ -1,87 +1,132 @@
-# Technical Documentation
+# Factum SaaS - System Reference Manual
 
-## 1. System Architecture
-
-**Finances SaaS** is built using a monolithic architecture that leverages the power of Laravel for the backend and React (via Inertia.js) for the frontend. This approach eliminates the complexity of managing a separate API and frontend application while providing a modern Single Page Application (SPA) experience.
-
-### Core Components
-- **Backend Framework**: Laravel 10.x (PHP 8.2)
-- **Frontend Library**: React 18
-- **Bridge**: Inertia.js (connects Laravel routing/controllers to React views)
-- **Database**: PostgreSQL (Production/Neon), SQLite (Local)
-- **Cache/Queue**: Redis (Upstash)
-- **Styling**: Tailwind CSS
-
-### Directory Structure
-- **`app/Models`**: Eloquent models representing database tables (`Invoice`, `Payment`, `Account`, etc.).
-- **`app/Http/Controllers`**: Handles business logic and returns Inertia responses.
-- **`resources/js/Pages`**: React components representing full pages (routed via Laravel).
-- **`resources/js/Components`**: Reusable UI components (Buttons, Cards, Inputs).
-- **`routes/web.php`**: Defines all application routes.
+## 1. Executive Summary
+**Factum** is a comprehensive financial management SaaS platform designed for small to medium businesses. It streamlines invoicing, expense tracking, and financial forecasting using a modern, monolithic architecture (Laravel + React). It features a unique **Financial Intelligence Engine** that automatically detects anomalies and trends in ledger data.
 
 ---
 
-## 2. Database Schema
+## 2. Core Modules & Features
 
-The application uses a relational database structure. Key relationships include:
+### 💰 Invoicing & Receivables
+- **Standard Invoices**: Create, edit, and send professional invoices to clients. Supports multi-currency and tax calculations.
+- **Recurring Invoices**: Set up automated billing schedules (Daily, Weekly, Monthly, Yearly). The system automatically generates and emails invoices on the due date.
+- **Quotes/Estimates**: Create proposals that can be converted into Invoices with a single click upon acceptance.
+- **Credit Notes**: Issue refunds or credit balances to customers, maintaining accurate accounting records.
+- **PDF Generation**: Native PDF export for all documents (Invoices, Quotes, Credit Notes).
 
-- **Users**: Admin and staff access.
-- **Accounts**: Customers and Suppliers.
-    - Has many `Invoices`, `Quotes`, `CreditNotes`.
-- **Invoices**:
-    - Belongs to `Account` (Customer).
-    - Has many `LineItems`.
-    - Has many `Payments`.
-- **RecurringInvoices**:
-    - Stores templates for generating invoices automatically.
-- **Expenses**:
-    - Tracks outgoing modifications.
-- **ActivityLogs**:
-    - Polymorphic relationship tracking actions on all models.
+### 💸 Expenses & Payables
+- **Expense Tracking**: Log business expenses with categorization (e.g., Office Supplies, Services).
+- **Vendor Management**: Track payments to suppliers and manage vendor profiles.
+- **Receipt Attachments**: (Planned) Upload and store digital receipts.
 
----
+### 👥 CRM (Accounts)
+- **Customer Profiles**: Detailed records of clients including billing details, currency preference, and contact info.
+- **Supplier Profiles**: Manage vendor details and payment terms.
+- **Activity Feed**: Audit trail of all interactions (Invoice Sent, Viewed, Paid) per account.
 
-## 3. Key Services
+### 📊 Reports & Analytics
+- **Cash Flow Forecast**: Predictive modeling of future cash position based on due invoices and recurring expenses.
+- **Financial Reports**: Generate P&L (Profit & Loss), Expense Breakdowns, and Revenue Reports.
+- **Dashboard**: Real-time overview of:
+    - Total Revenue & Outstanding Invoices.
+    - Cash Flow Scenarios (Optimistic, Pessimistic, Realistic).
+    - **Financial Insights** (See Section 3).
 
-### Authentication
-Uses standard Laravel cookie-based session authentication. Inertia shares the authenticated user state via the `HandleInertiaRequests` middleware.
-
-### PDF Generation
-Invoices and Quotes can be exported to PDF. This is handled by a dedicated controller action that generates a Blade view and converts it to PDF.
-
-### Activity Logging
-A custom `LogsActivity` trait allows any model to track `created`, `updated`, `deleted`, and `viewed` events. This data is displayed in the "Activity Feed" on detail pages.
-
----
-
-## 4. Deployment Architecture
-
-### **Database (Neon)**
-- A serverless PostgreSQL instance.
-- **Connection**: `pgsql` driver in Laravel.
-- **Configuration**: `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
-
-### **Cache & Queue (Upstash)**
-- A serverless Redis instance.
-- **Connection**: `predis` or `phpredis`.
-- **Configuration**: `REDIS_HOST`, `REDIS_PASSWORD`, `REDIS_PORT`.
-
-### **Application Server (Render)**
-- Hosts the Laravel application (Nginx + PHP-FPM).
-- Runs `php artisan serve` is NOT for production. Use Nginx/Apache.
-- **Build Command**: `composer install --no-dev && npm install && npm run build`
-- **Start Command**: `php artisan migrate --force && php-fpm` (custom script recommended).
-
-### **Frontend Assets**
-- Compiled by Vite.
-- In production, `npm run build` generates static assets in `public/build`.
-- These are served by Laravel's `asset()` helper.
+### ⚙️ Settings & Configuration
+- **Tax Configuration**: Define global tax rules (e.g., VAT, GST) and default rates.
+- **User Profile**: Manage account details and security settings.
+- **Company Settings**: Configure company details, logo, and address for documents.
 
 ---
 
-## 5. Security Measures
+## 3. 🧠 Financial Intelligence Service (AI)
 
-- **CSRF Protection**: Standard Laravel double-submit cookie pattern (handled automatically by Axios/Inertia).
-- **Authorization**: Laravel Policies (`InvoicePolicy`, etc.) ensure users can only access authorized data.
-- **Validation**: Strict server-side validation using Form Requests.
-- **Sanitization**: Inputs are sanitized to prevent XSS (escaped by React by default).
+Factum includes a built-in **Financial Intelligence Service** that acts as a virtual CFO. Instead of static reports, it actively scans the ledger for patterns.
+
+**Capabilities:**
+1.  **Anomaly Detection**:
+    - **Expense Spikes**: Flags months where expenses exceed the norm by >20%.
+    - **Unusual Transactions**: Identifies individual transactions that are statistical outliers (>3 std dev).
+    - **Duplicate Payments**: Detects potential double-payments to vendors.
+2.  **Risk Management**:
+    - **Revenue Drop**: Alerts if MRR (Monthly Recurring Revenue) drops by >15%.
+    - **Missing Invoices**: Scans sequences (e.g., `INV-001`, `INV-003`) to detect missing or deleted records.
+    - **Cash Flow Warning**: Triggers alerts if Outstanding Debt > 2x Monthly Revenue.
+3.  **Trend Analysis**:
+    - **Burn Rate**: Monitors increasing monthly spend trends.
+    - **Margin Erosion**: Alerts if profit margins are shrinking despite revenue growth.
+
+**Automation**:
+- This analysis runs **hourly** via the Laravel Scheduler.
+- Insights are automatically displayed on the user's Dashboard grid (Top 8 most critical).
+
+---
+
+## 4. Technical Architecture
+
+### Stack
+- **Backend**: Laravel 10.x (PHP 8.2+) / Octane (RoadRunner) for high performance.
+- **Frontend**: React 18 (TypeScript) via Inertia.js.
+- **Database**: PostgreSQL 15+ (Production: Neon).
+- **Cache/Queue**: Redis (Production: Upstash).
+- **Styling**: Tailwind CSS.
+
+### Key Directories
+- `app/Services/FinancialIntelligenceService.php`: Core logic for data analysis.
+- `app/Console/Commands/GenerateFinancialInsights.php`: Artisan command for analysis trigger.
+- `database/seeders/FinancialInsightSeeder.php`: Generates *real* data patterns (anomalies) for demo purposes.
+
+---
+
+## 5. Deployment & Infrastructure
+
+The application is deployed on **Render** (Web Service + Cron Job).
+
+### Render Configuration (`render.yaml`)
+1.  **Web Service (`factum-api`)**:
+    - Runs the application using **Laravel Octane** (RoadRunner) for sub-millisecond response times.
+    - Command: `php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=10000`.
+2.  **Cron Job (`factum-scheduler`)**:
+    - Runs `php artisan schedule:run` every minute (`* * * * *`).
+    - Ensures the `insights:generate` command runs hourly to refresh dashboard analytics.
+
+### Environment Variables
+Production requires the following keys:
+- `DB_CONNECTION`: `pgsql`
+- `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`: Neon Credentials.
+- `REDIS_HOST`, `REDIS_PASSWORD`, `REDIS_PORT`: Upstash Credentials.
+- `OCTANE_SERVER`: `roadrunner`.
+
+---
+
+## 6. Local Development Guide
+
+1.  **Setup**:
+    ```bash
+    composer install
+    npm install
+    cp .env.example .env
+    php artisan key:generate
+    ```
+2.  **Database**:
+    ```bash
+    # Ensure SQLite file exists or Postgres is running
+    touch database/database.sqlite
+    php artisan migrate:fresh --seed
+    ```
+    *Note: The seeder plants dynamic anomalies to demonstrate the AI features.*
+
+3.  **Run**:
+    ```bash
+    npm run dev    # Terminal 1 (Frontend)
+    php artisan serve # Terminal 2 (Backend)
+    ```
+
+4.  **Run Scheduler Locally**:
+    ```bash
+    php artisan schedule:work
+    ```
+
+---
+
+_Documentation updated automatically by Antigravity._
