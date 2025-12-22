@@ -18,6 +18,7 @@ class FinancialInsightSeeder extends Seeder
     public function run(): void
     {
         $admin = User::first() ?? User::factory()->create();
+        $customer = \App\Models\Account::first() ?? \App\Models\Account::factory()->create(['user_id' => $admin->id, 'type' => 'customer', 'name' => 'Demo Client']);
         
         // Clear previous insights to avoid duplication if re-run
         FinancialInsight::truncate();
@@ -41,15 +42,35 @@ class FinancialInsightSeeder extends Seeder
 
         // 2. Trigger Revenue Drop & Margin Erosion
         // Last month: High Revenue
+        // Create an invoice first for the payments
+        $pastInvoice = Invoice::factory()->create([
+            'user_id' => $admin->id,
+            'customer_id' => $customer->id,
+            'status' => 'paid',
+            'total_amount' => 10000.00,
+            'date' => now()->subMonth()->startOfMonth()->addDays(1),
+        ]);
+        
         Payment::factory()->count(10)->create([
             'user_id' => $admin->id,
+            'invoice_id' => $pastInvoice->id,
             'amount' => 1000, // $10,000 Total
             'date' => now()->subMonth()->startOfMonth()->addDays(10),
             'status' => 'completed',
         ]);
+        
         // This month: Low Revenue (only one payment)
+        $currentInvoice = Invoice::factory()->create([
+            'user_id' => $admin->id,
+            'customer_id' => $customer->id,
+            'status' => 'paid',
+            'total_amount' => 1000.00,
+            'date' => now()->startOfMonth()->addDays(1),
+        ]);
+
         Payment::factory()->create([
             'user_id' => $admin->id,
+            'invoice_id' => $currentInvoice->id,
             'amount' => 1000, // $1,000 Total (-90% drop)
             'date' => now()->startOfMonth()->addDays(5),
             'status' => 'completed',
@@ -60,6 +81,7 @@ class FinancialInsightSeeder extends Seeder
         foreach ([1, 2, 4, 5] as $inc) { // Skip 3
             Invoice::factory()->create([
                 'user_id' => $admin->id,
+                'customer_id' => $customer->id,
                 'number' => 'INV-' . ($startNum + $inc),
                 'date' => now()->subDays(5),
             ]);
@@ -68,6 +90,7 @@ class FinancialInsightSeeder extends Seeder
         // 4. Trigger Duplicate Payments
         $dupInvoice = Invoice::factory()->create([
             'user_id' => $admin->id,
+            'customer_id' => $customer->id,
             'status' => 'paid',
             'total_amount' => 500.00,
         ]);
@@ -82,6 +105,7 @@ class FinancialInsightSeeder extends Seeder
         // 5. Trigger Payment Delays
         Invoice::factory()->count(6)->create([
             'user_id' => $admin->id,
+            'customer_id' => $customer->id,
             'status' => 'overdue',
             'due_date' => now()->subDays(45), // 45 days late
             'total_amount' => 1200.00,
