@@ -17,30 +17,52 @@ class FinancialInsightSeeder extends Seeder
         $user = User::first() ?? User::factory()->create();
 
         $insights = [
+            // 1. CRITICAL
             [
                 'type' => 'anomaly',
                 'severity' => 'critical',
-                'title' => 'Unusual Expense Spike Detected',
-                'description' => 'Marketing expenses are 200% higher than the 3-month average. Investigate ad spend immediately.',
+                'title' => 'Unusual Expense Spike',
+                'description' => 'Marketing expenses are 200% higher than average. Investigate ad spend immediately.',
                 'impact_amount' => 12500.00,
                 'category' => 'expense',
             ],
+            // 2. HIGH
             [
                 'type' => 'forecast',
                 'severity' => 'high',
-                'title' => 'Projected Cash Flow Shortfall',
-                'description' => 'Based on current accounts receivable, a cash flow dip is expected in 14 days.',
+                'title' => 'Cash Flow Shortfall Forecast',
+                'description' => 'Projected cash flow dip in 14 days based on current AP/AR aging.',
                 'impact_amount' => 8400.00,
                 'category' => 'cash_flow',
             ],
+            // 3. HIGH
+            [
+                'type' => 'anomaly',
+                'severity' => 'high',
+                'title' => 'Duplicate Vendor Payment',
+                'description' => 'Potential duplicate payment detected for vendor "Acme Corp" ($450.50).',
+                'impact_amount' => 450.50,
+                'category' => 'expense',
+            ],
+            // 4. MEDIUM
             [
                 'type' => 'trend',
                 'severity' => 'medium',
-                'title' => 'Recurring Revenue Growth',
+                'title' => 'Revenue Growth Trend',
                 'description' => 'Monthly Recurring Revenue (MRR) has grown by 15% over the last quarter.',
                 'impact_amount' => 3200.00,
                 'category' => 'revenue',
             ],
+            // 5. MEDIUM
+            [
+                'type' => 'optimization',
+                'severity' => 'medium',
+                'title' => 'Subscription Redundancy',
+                'description' => 'Multiple similar software subscriptions detected. Consolidation recommended.',
+                'impact_amount' => 890.00,
+                'category' => 'expense',
+            ],
+            // 6. LOW
             [
                 'type' => 'optimization',
                 'severity' => 'low',
@@ -49,22 +71,7 @@ class FinancialInsightSeeder extends Seeder
                 'impact_amount' => 0,
                 'category' => 'tax',
             ],
-            [
-                'type' => 'anomaly',
-                'severity' => 'high',
-                'title' => 'Duplicate Vendor Payment',
-                'description' => 'Potential duplicate payment detected for vendor "Acme Corp" on the same date.',
-                'impact_amount' => 450.50,
-                'category' => 'expense',
-            ],
-            [
-                'type' => 'forecast',
-                'severity' => 'medium',
-                'title' => 'Inventory Turnover Slowdown',
-                'description' => 'Stock rotation has slowed by 10% this month. Consider a promotional discount.',
-                'impact_amount' => 1200.00,
-                'category' => 'inventory',
-            ],
+            // 7. LOW
             [
                 'type' => 'trend',
                 'severity' => 'low',
@@ -73,69 +80,14 @@ class FinancialInsightSeeder extends Seeder
                 'impact_amount' => 150.00,
                 'category' => 'expense',
             ],
-            [
-                'type' => 'optimization',
-                'severity' => 'medium',
-                'title' => 'Subscription Consolidation',
-                'description' => 'Multiple redundant software subscriptions detected. Consolidating could save funds.',
-                'impact_amount' => 890.00,
-                'category' => 'expense',
-            ],
-            [
-                'type' => 'anomaly',
-                'severity' => 'critical',
-                'title' => 'Large Unauthorized Transaction',
-                'description' => 'A transaction of $50,000 to an unknown account was flagged for review.',
-                'impact_amount' => 50000.00,
-                'category' => 'security',
-            ],
+            // 8. MEDIUM (Analytics)
             [
                 'type' => 'forecast',
-                'severity' => 'high',
-                'title' => 'Contract Renewal Upcoming',
-                'description' => 'Major client contract "Globex" expires in 30 days. Prepare renewal terms.',
-                'impact_amount' => 25000.00,
-                'category' => 'revenue',
-            ],
-            [
-                'type' => 'trend',
                 'severity' => 'medium',
-                'title' => 'Customer Churn Increase',
-                'description' => 'Churn rate slightly elevated (2.5%) compared to last month (1.8%).',
-                'impact_amount' => 2100.00,
-                'category' => 'revenue',
-            ],
-            [
-                'type' => 'optimization',
-                'severity' => 'low',
-                'title' => 'Early Payment Discount',
-                'description' => 'Paying invoice #9923 early could save 2% ($450).',
-                'impact_amount' => 450.00,
-                'category' => 'expense',
-            ],
-             [
-                'type' => 'anomaly',
-                'severity' => 'medium',
-                'title' => 'Weekend Login Activity',
-                'description' => 'Unusual account activity detected during non-business hours.',
-                'impact_amount' => 0,
-                'category' => 'security',
-            ],
-            [
-                'type' => 'forecast',
-                'severity' => 'low',
-                'title' => 'Server Capacity Warning',
-                'description' => 'Server load projected to reach 90% capacity by end of month.',
-                'impact_amount' => 0,
-                'category' => 'infrastructure',
-            ],
-            [
-                'type' => 'trend',
-                'severity' => 'high',
-                'title' => 'Mobile Traffic Surge',
-                'description' => 'Mobile user traffic has increased by 40%, indicating a shift in platform usage.',
-                'impact_amount' => 0,
-                'category' => 'analytics',
+                'title' => 'Inventory Turnover Slowdown',
+                'description' => 'Stock rotation has slowed by 10% this month. Consider a promotional discount.',
+                'impact_amount' => 1200.00,
+                'category' => 'inventory',
             ],
         ];
 
