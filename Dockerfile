@@ -32,6 +32,5 @@ CMD php artisan migrate --force && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
-    ./vendor/bin/rr get-binary --location /usr/local/bin/rr && \
-    chmod +x /usr/local/bin/rr && \
+    ./vendor/bin/rr get-binary && \
     php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=10000
