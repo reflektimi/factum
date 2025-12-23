@@ -26,4 +26,15 @@ class Setting extends Model
         'tax_rules' => 'array',
         'currencies' => 'array',
     ];
+
+    /**
+     * Get the logo path as a full URL
+     */
+    public function getLogoPathAttribute($value)
+    {
+        if ($value && !filter_var($value, FILTER_VALIDATE_URL)) {
+            return url($value);
+        }
+        return $value;
+    }
 }
