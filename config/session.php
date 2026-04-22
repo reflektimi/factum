@@ -6,6 +6,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cross-domain Cookie Settings
+    |--------------------------------------------------------------------------
+    |
+    | These settings allow cookies to be sent cross-domain between your frontend
+    | and backend. 'domain' should match your main domain, and 'same_site' should
+    | be 'none' for cross-site cookies. 'secure' must be true for SameSite=None.
+    */
+    'domain' => '.reflektimi.com',
+    'same_site' => 'none',
+    'secure' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Session Driver
     |--------------------------------------------------------------------------
     |
