@@ -10,9 +10,9 @@ services:
       - key: APP_KEY
         generateValue: true
       - key: APP_URL
-        value: https://factum-api.onrender.com
+        value: https://factum-5v5v.onrender.com
       - key: FRONTEND_URL
-        value: https://factum.vercel.app
+        value: https://factum.reflektimi.com
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
@@ -40,7 +40,7 @@ services:
       - key: SESSION_DOMAIN
         value: ""
       - key: SANCTUM_STATEFUL_DOMAINS
-        value: localhost:5173,factum.vercel.app
+        value: localhost:5173,factum.reflektimi.com
       - key: CACHE_DRIVER
         value: file
       - key: QUEUE_CONNECTION
