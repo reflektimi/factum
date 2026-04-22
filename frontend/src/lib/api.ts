@@ -12,7 +12,7 @@ const api = axios.create({
 
 // Handle CSRF for Sanctum
 export const getCsrfToken = async () => {
-    await api.get('/sanctum/csrf-cookie');
+    await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
 };
 
 export default api;
